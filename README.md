@@ -30,7 +30,7 @@ or just looking for inspiration, Gollama is here to assist you.
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/yourusername/gollama.git
+   git clone https://github.com/Gaurav-Gosain/gollama.git
    ```
 
 2. Navigate to the project directory:
