@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"flag"
 	"fmt"
 	"math/rand"
 	"net/http"
@@ -77,8 +78,8 @@ func InitSpinner() spinner.Model {
 	return s
 }
 
-func newModel(prompt, modelName string) (*Gollama, error) {
-	out := fmt.Sprintf("# Prompt\n`%s`\n# Response\n", prompt)
+func newModel(config Config) (*Gollama, error) {
+	out := fmt.Sprintf("# Prompt\n`%s`\n# Response\n", config.Prompt)
 
 	title, _ := glamour.Render(out, "dark")
 
@@ -99,8 +100,8 @@ func newModel(prompt, modelName string) (*Gollama, error) {
 	}
 
 	return &Gollama{
-		model:    modelName,
-		prompt:   prompt,
+		model:    config.ModelName,
+		prompt:   config.Prompt,
 		spinner:  InitSpinner(),
 		title:    title,
 		state:    startState,
@@ -115,18 +116,6 @@ func (gollama Gollama) Init() tea.Cmd {
 
 func (gollama Gollama) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
-	// case tea.WindowSizeMsg:
-	// var cmd tea.Cmd
-	// 	gollama.width = msg.Width - 3
-	// 	gollama.height = msg.Height - 5
-	// 	gollama.viewport.Width = gollama.width
-	// 	gollama.viewport.Height = gollama.height
-	// 	gollama.renderer, _ = glamour.NewTermRenderer(
-	// 		glamour.WithAutoStyle(),
-	// 		glamour.WithWordWrap(gollama.width),
-	// 	)
-	// 	gollama.viewport, cmd = gollama.viewport.Update(msg)
-	// 	return gollama, cmd
 	case tea.KeyMsg:
 		// If the user presses q or ctrl+c, we'll quit the program
 		switch msg.String() {
@@ -239,67 +228,90 @@ func NotEmpty(s string) error {
 	return nil
 }
 
+type Config struct {
+	Prompt    string
+	ModelName string
+	PipedMode bool
+	Raw       bool
+}
+
 func main() {
-	// get these from flags
-	pipedMode := false
-	prompt := "Reverse a linked list in golang"
-	modelName := "llama2:latest"
+	var config Config
+
+	flag.BoolVar(&config.PipedMode, "piped", false, "Enable piped mode")
+	flag.BoolVar(&config.Raw, "raw", false, "Enable raw output")
+	flag.StringVar(&config.Prompt, "prompt", "", "Prompt to use for generation")
+	flag.StringVar(&config.ModelName, "model", "", "Model to use for generation")
+
+	flag.Parse()
 
 	var p *tea.Program
 
-	if !pipedMode {
-		url := "http://localhost:11434/api/tags"
+	if !config.PipedMode {
 
-		res, err := http.Get(url)
-		if err != nil {
-			fmt.Println("Error getting tags:", err)
+		fields := []huh.Field{}
+
+		if config.Prompt == "" {
+			fields = append(fields, huh.NewText().
+				Title("Prompt").
+				// Prompt("Enter a prompt: ").
+				Validate(NotEmpty).
+				Placeholder("prompt go brr...").
+				Value(&config.Prompt),
+			)
+		}
+		if config.ModelName == "" {
+			url := "http://localhost:11434/api/tags"
+
+			res, err := http.Get(url)
+			if err != nil {
+				fmt.Println("Error getting tags:", err)
+			}
+
+			decoder := json.NewDecoder(res.Body)
+			var tags TagResponse
+			err = decoder.Decode(&tags)
+			if err != nil {
+				fmt.Println("Error decoding response:", err)
+				return
+			}
+
+			if len(tags.Models) == 0 {
+				fmt.Println("No models available")
+				return
+			}
+
+			modelNames := make([]string, 0, len(tags.Models))
+
+			for _, model := range tags.Models {
+				modelNames = append(modelNames, model.Name)
+			}
+			config.ModelName = modelNames[0]
+			fields = append(fields, huh.NewSelect[string]().
+				Key("model").
+				Options(huh.NewOptions(modelNames...)...).
+				Title("Pick an Ollama Model").
+				Description("Choose the model to use for generation.").
+				Value(&config.ModelName),
+			)
 		}
 
-		decoder := json.NewDecoder(res.Body)
-		var tags TagResponse
-		err = decoder.Decode(&tags)
-		if err != nil {
-			fmt.Println("Error decoding response:", err)
-			return
+		if len(fields) > 0 {
+
+			form := huh.NewForm(
+				huh.NewGroup(
+					fields...,
+				),
+			)
+
+			err := form.Run()
+			if err != nil {
+				fmt.Println("Error running form:", err)
+				return
+			}
 		}
 
-		if len(tags.Models) == 0 {
-			fmt.Println("No models available")
-			return
-		}
-
-		modelNames := make([]string, 0, len(tags.Models))
-
-		for _, model := range tags.Models {
-			modelNames = append(modelNames, model.Name)
-		}
-
-		modelName = modelNames[0]
-
-		form := huh.NewForm(
-			huh.NewGroup(
-				huh.NewText().
-					Title("Prompt").
-					// Prompt("Enter a prompt: ").
-					Validate(NotEmpty).
-					Placeholder("prompt go brr...").
-					Value(&prompt),
-				huh.NewSelect[string]().
-					Key("model").
-					Options(huh.NewOptions(modelNames...)...).
-					Title("Pick an Ollama Model").
-					Description("Choose the model to use for generation.").
-					Value(&modelName),
-			),
-		)
-
-		err = form.Run()
-		if err != nil {
-			fmt.Println("Error running form:", err)
-			return
-		}
-
-		gollama, err := newModel(prompt, modelName)
+		gollama, err := newModel(config)
 		if err != nil {
 			fmt.Println("Error creating model:", err)
 			return
@@ -308,6 +320,15 @@ func main() {
 		p = tea.NewProgram(
 			gollama,
 		)
+	} else {
+		if config.Prompt == "" {
+			fmt.Println("Prompt can't be empty")
+			return
+		}
+		if config.ModelName == "" {
+			fmt.Println("Model can't be empty")
+			return
+		}
 	}
 
 	// wait for the go routine to finish before exiting
@@ -321,8 +342,8 @@ func main() {
 		url := "http://localhost:11434/api/generate"
 
 		newPayload := Payload{
-			Model:  modelName,
-			Prompt: prompt,
+			Model:  config.ModelName,
+			Prompt: config.Prompt,
 		}
 
 		payloadBytes, err := json.Marshal(newPayload)
@@ -362,14 +383,14 @@ func main() {
 				return
 			}
 
-			if !pipedMode {
+			if !config.PipedMode && !config.Raw {
 				p.Send(resp)
 			} else {
 				fmt.Print(resp.Response)
 			}
 
 			if resp.Done {
-				if pipedMode {
+				if config.PipedMode || config.Raw {
 					fmt.Println()
 				}
 				break
@@ -377,8 +398,7 @@ func main() {
 		}
 	}()
 
-	// resModel, err := p.Run()
-	if !pipedMode {
+	if !config.PipedMode && !config.Raw {
 		resModel, err := p.Run()
 		if err != nil {
 			fmt.Println("Error running program:", err)
