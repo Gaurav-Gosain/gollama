@@ -82,7 +82,7 @@ Gollama relies on the following third-party packages:
 
 ## 🗺️ Roadmap
 
-- [ ] Implement piped mode for automated usage.
+- [x] Implement piped mode for automated usage.
 - [ ] Add support for downloading models directly from Ollama using the rest API.
 - [x] Add support for extracting codeblocks from the generated responses.
 - [x] Add ability to copy responses/codeblocks to clipboard.

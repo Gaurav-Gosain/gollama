@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"net/http"
+	"os"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/huh"
@@ -36,8 +37,21 @@ func NewConfig() *Config {
 }
 
 func (c *Config) ParseCLIArgs() {
+
+	fileInfo, err := os.Stdin.Stat()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error getting standard input information: %v\n", err)
+		os.Exit(1)
+	}
+
+	c.PipedMode = true
+
+	// Check if there is data available to read
+	if fileInfo.Mode()&os.ModeNamedPipe == 0 {
+		c.PipedMode = false
+	}
+
 	// Parse command line flags
-	flag.BoolVar(&c.PipedMode, "piped", BOOL_DEFAULT, "Enable piped mode")
 	flag.BoolVar(&c.Raw, "raw", BOOL_DEFAULT, "Enable raw output")
 	flag.StringVar(&c.Prompt, "prompt", STRING_DEFAULT, "Prompt to use for generation")
 	flag.StringVar(&c.ModelName, "model", STRING_DEFAULT, "Model to use for generation")

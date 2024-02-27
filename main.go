@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"sync"
 
@@ -11,12 +12,28 @@ import (
 )
 
 func main() {
-	gollama := config.NewConfig()
-
 	var p *tea.Program
 
-	if !gollama.PipedMode {
+	gollama := config.NewConfig()
 
+	if gollama.PipedMode {
+		if gollama.ModelName == "" {
+			fmt.Println("Model can't be empty when running in piped mode")
+			return
+		}
+
+		pipedData, err := io.ReadAll(os.Stdin)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error reading standard input: %v\n", err)
+			os.Exit(1)
+		}
+
+		if gollama.Prompt == "" {
+			gollama.Prompt = string(pipedData)
+		} else {
+			gollama.Prompt = fmt.Sprintf("Context: %s\n\nQuestion: %s", pipedData, gollama.Prompt)
+		}
+	} else {
 		err := gollama.RunPromptForm()
 
 		if err != nil {
@@ -35,15 +52,6 @@ func main() {
 			// TODO: decide if we want to use the altscreen or not
 			tea.WithAltScreen(), // Use the altscreen.
 		)
-	} else {
-		if gollama.Prompt == "" {
-			fmt.Println("Prompt can't be empty")
-			return
-		}
-		if gollama.ModelName == "" {
-			fmt.Println("Model can't be empty")
-			return
-		}
 	}
 
 	// wait for the go routine to finish before exiting
