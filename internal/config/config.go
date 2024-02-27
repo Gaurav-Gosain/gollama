@@ -46,7 +46,7 @@ func (c *Config) ParseCLIArgs() {
 	c.PipedMode = true
 
 	// Check if there is data available to read
-	if fileInfo.Mode()&os.ModeNamedPipe == 0 {
+	if (fileInfo.Mode()&os.ModeNamedPipe == 0) && (fileInfo.Mode()&os.ModeCharDevice != 0) {
 		c.PipedMode = false
 	}
 
@@ -73,6 +73,10 @@ func validate(s string) error {
 }
 
 func (c *Config) GetFormFields() (fields []huh.Field, err error) {
+	if c.PipedMode {
+		return fields, nil
+	}
+
 	if c.ModelName == STRING_DEFAULT {
 		modelNames, err := c.ApiClient.OllamaModelNames()
 		if err != nil {
