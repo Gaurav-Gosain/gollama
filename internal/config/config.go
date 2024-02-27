@@ -12,17 +12,19 @@ import (
 	"github.com/gaurav-gosain/gollama/internal/api"
 )
 
-var STRING_DEFAULT = ""
-var BOOL_DEFAULT = false
+var (
+	STRING_DEFAULT = ""
+	BOOL_DEFAULT   = false
+)
 
 // Config represents the configuration options for the program
 type Config struct {
+	ApiClient *api.ApiClient
 	Prompt    string
 	ModelName string
+	BaseURL   string
 	PipedMode bool
 	Raw       bool
-	BaseURL   string
-	ApiClient *api.ApiClient
 }
 
 func NewConfig() *Config {
@@ -60,7 +62,6 @@ func validate(s string) error {
 func (c *Config) GetFormFields() (fields []huh.Field, err error) {
 	if c.ModelName == STRING_DEFAULT {
 		modelNames, err := c.ApiClient.OllamaModelNames()
-
 		if err != nil {
 			return nil, err
 		}
@@ -92,9 +93,7 @@ type Payload struct {
 }
 
 func (c *Config) RunPromptForm() (err error) {
-
 	fields, err := c.GetFormFields()
-
 	if err != nil {
 		return err
 	}
@@ -117,7 +116,6 @@ func (c *Config) RunPromptForm() (err error) {
 }
 
 func (c *Config) Generate(p *tea.Program) {
-
 	newPayload := Payload{
 		Model:  c.ModelName,
 		Prompt: c.Prompt,
@@ -130,7 +128,6 @@ func (c *Config) Generate(p *tea.Program) {
 	}
 
 	generateResponse, err := c.ApiClient.Generate(payloadBytes)
-
 	if err != nil {
 		fmt.Println("Error generating response:", err)
 		return

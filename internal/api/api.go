@@ -50,7 +50,6 @@ func (a *ApiClient) URL(suffix string) string {
 }
 
 func (a *ApiClient) OllamaModelNames() ([]string, error) {
-
 	url := a.URL("/api/tags")
 
 	res, err := http.Get(url)
