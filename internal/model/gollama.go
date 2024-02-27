@@ -3,6 +3,7 @@ package model
 import (
 	"fmt"
 	"math/rand"
+	"regexp"
 
 	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/viewport"
@@ -11,6 +12,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/gaurav-gosain/gollama/internal/api"
 	"github.com/gaurav-gosain/gollama/internal/config"
+	"golang.design/x/clipboard"
 )
 
 type state int
@@ -40,16 +42,30 @@ var spinners = []spinner.Spinner{
 var helpStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("241")).Render
 
 type Gollama struct {
-	renderer *glamour.TermRenderer
-	model    string
-	prompt   string
-	output   string
-	title    string
-	viewport viewport.Model
-	spinner  spinner.Model
-	width    int
-	height   int
-	state    state
+	renderer         *glamour.TermRenderer
+	model            string
+	prompt           string
+	output           string
+	title            string
+	viewport         viewport.Model
+	spinner          spinner.Model
+	views            []string
+	currentViewIndex int
+	state            state
+}
+
+func (gollama *Gollama) FindCodeBlocks() {
+	var codeBlocks []string
+
+	codeBlocks = append(codeBlocks, gollama.output)
+
+	// regex to find code blocks
+	re := regexp.MustCompile("```[\\s\\S]*?```")
+	matches := re.FindAllString(gollama.output, -1)
+
+	codeBlocks = append(codeBlocks, matches...)
+
+	gollama.views = codeBlocks
 }
 
 func InitSpinner() spinner.Model {
@@ -96,6 +112,32 @@ func (gollama Gollama) Init() tea.Cmd {
 	return gollama.spinner.Tick
 }
 
+func (gollama *Gollama) CopyToClipboard() {
+	// cross-platform clipboard copy
+	err := clipboard.Init()
+	if err != nil {
+		panic(err)
+	}
+
+	clipboard.Write(clipboard.FmtText, []byte(gollama.views[gollama.currentViewIndex]))
+
+	fmt.Print("Copied to clipboard!\n")
+}
+
+func (gollama *Gollama) NavigateView(direction int) {
+	gollama.currentViewIndex += direction
+	if gollama.currentViewIndex < 0 {
+		gollama.currentViewIndex = len(gollama.views) - 1
+	}
+	if gollama.currentViewIndex >= len(gollama.views) {
+		gollama.currentViewIndex = 0
+	}
+
+	glamOutput, _ := gollama.renderer.Render(gollama.views[gollama.currentViewIndex])
+	gollama.viewport.SetContent(glamOutput)
+	gollama.viewport.GotoTop()
+}
+
 func (gollama Gollama) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
@@ -104,6 +146,24 @@ func (gollama Gollama) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "ctrl+c", "q":
 			gollama.state = quitState
 			return gollama, tea.Quit
+		case "c":
+			if len(gollama.views) > 0 {
+				gollama.CopyToClipboard()
+			}
+		case "left", "h":
+			if len(gollama.views) > 0 {
+				gollama.NavigateView(-1)
+			}
+			var cmd tea.Cmd
+			gollama.viewport, cmd = gollama.viewport.Update(msg)
+			return gollama, cmd
+		case "right", "l":
+			if len(gollama.views) > 0 {
+				gollama.NavigateView(1)
+			}
+			var cmd tea.Cmd
+			gollama.viewport, cmd = gollama.viewport.Update(msg)
+			return gollama, cmd
 		default:
 			if gollama.state == responseState {
 				return gollama, nil
@@ -115,7 +175,9 @@ func (gollama Gollama) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case api.ResultMsg:
 		if msg.Done {
 			gollama.state = doneState
-			// return m, tea.Quit
+
+			gollama.FindCodeBlocks()
+
 			return gollama, nil
 		}
 
@@ -145,13 +207,8 @@ func (gollama Gollama) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	default:
 		return gollama, nil
 	}
-}
 
-func FinalResponse(gollama Gollama) string {
-	var out string
-
-	out, _ = glamour.Render(gollama.output, "dark")
-	return gollama.title + out
+	return gollama, nil
 }
 
 func (gollama Gollama) View() (render string) {
@@ -171,5 +228,15 @@ func (gollama Gollama) View() (render string) {
 }
 
 func (gollama Gollama) helpView() string {
-	return helpStyle("\n  ↑/↓: Navigate • q: Quit\n")
+	if len(gollama.views) > 1 {
+		return helpStyle(fmt.Sprintf("\n  ↑/↓: Navigate • q: Quit • c: Copy • ←/→: Navigate code blocks (%d / %d)\n", gollama.currentViewIndex+1, len(gollama.views)))
+	}
+	return helpStyle("\n  ↑/↓: Navigate • q: Quit • c: Copy\n")
+}
+
+func FinalResponse(gollama Gollama) string {
+	var out string
+
+	out, _ = glamour.Render(gollama.output, "dark")
+	return gollama.title + out
 }
