@@ -42,16 +42,17 @@ var spinners = []spinner.Spinner{
 var helpStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("241")).Render
 
 type Gollama struct {
-	renderer         *glamour.TermRenderer
-	model            string
-	prompt           string
-	output           string
-	title            string
-	viewport         viewport.Model
-	views            []string
-	spinner          spinner.Model
-	currentViewIndex int
-	state            state
+	renderer          *glamour.TermRenderer
+	model             string
+	prompt            string
+	output            string
+	title             string
+	viewport          viewport.Model
+	views             []string
+	spinner           spinner.Model
+	currentViewIndex  int
+	state             state
+	copiedToClipboard bool
 }
 
 func (gollama *Gollama) FindCodeBlocks() {
@@ -121,7 +122,7 @@ func (gollama *Gollama) CopyToClipboard() {
 
 	clipboard.Write(clipboard.FmtText, []byte(gollama.views[gollama.currentViewIndex]))
 
-	fmt.Print("Copied to clipboard!\n")
+	gollama.copiedToClipboard = true
 }
 
 func (gollama *Gollama) NavigateView(direction int) {
@@ -141,6 +142,7 @@ func (gollama *Gollama) NavigateView(direction int) {
 func (gollama Gollama) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
+		gollama.copiedToClipboard = false
 		// If the user presses q or ctrl+c, we'll quit the program
 		switch msg.String() {
 		case "ctrl+c", "q":
@@ -228,10 +230,22 @@ func (gollama Gollama) View() (render string) {
 }
 
 func (gollama Gollama) helpView() string {
+	helpViewStr := "\n  ↑/↓: Navigate • q: Quit • c: Copy %s\n"
+
 	if len(gollama.views) > 1 {
-		return helpStyle(fmt.Sprintf("\n  ↑/↓: Navigate • q: Quit • c: Copy • ←/→: Navigate code blocks (%d / %d)\n", gollama.currentViewIndex+1, len(gollama.views)))
+		helpViewStr = fmt.Sprintf(
+			helpViewStr,
+			fmt.Sprintf(
+				"• ←/→: Navigate code blocks (%d / %d)\n",
+				gollama.currentViewIndex+1,
+				len(gollama.views),
+			),
+		)
 	}
-	return helpStyle("\n  ↑/↓: Navigate • q: Quit • c: Copy\n")
+	if gollama.copiedToClipboard {
+		helpViewStr = helpViewStr + "  Copied to clipboard!\n"
+	}
+	return helpStyle(helpViewStr)
 }
 
 func FinalResponse(gollama Gollama) string {

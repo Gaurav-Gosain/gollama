@@ -32,6 +32,8 @@ func main() {
 
 		p = tea.NewProgram(
 			gollamaTUI,
+			// TODO: decide if we want to use the altscreen or not
+			tea.WithAltScreen(), // Use the altscreen.
 		)
 	} else {
 		if gollama.Prompt == "" {
