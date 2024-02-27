@@ -13,7 +13,7 @@ import (
 	"github.com/gaurav-gosain/gollama/internal/api"
 )
 
-var (
+const (
 	STRING_DEFAULT = ""
 	BOOL_DEFAULT   = false
 )
@@ -37,7 +37,6 @@ func NewConfig() *Config {
 }
 
 func (c *Config) ParseCLIArgs() {
-
 	fileInfo, err := os.Stdin.Stat()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error getting standard input information: %v\n", err)
