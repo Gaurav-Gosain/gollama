@@ -84,8 +84,8 @@ Gollama relies on the following third-party packages:
 
 - [ ] Implement piped mode for automated usage.
 - [ ] Add support for downloading models directly from Ollama using the rest API.
-- [ ] Add support for extracting codeblocks from the generated responses.
-- [ ] Add ability to copy responses/codeblocks to clipboard.
+- [x] Add support for extracting codeblocks from the generated responses.
+- [x] Add ability to copy responses/codeblocks to clipboard.
 
 ## 🤝 Contribution
 

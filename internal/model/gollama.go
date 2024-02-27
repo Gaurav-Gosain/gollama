@@ -48,8 +48,8 @@ type Gollama struct {
 	output           string
 	title            string
 	viewport         viewport.Model
-	spinner          spinner.Model
 	views            []string
+	spinner          spinner.Model
 	currentViewIndex int
 	state            state
 }
