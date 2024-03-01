@@ -141,39 +141,6 @@ func (gollama *Gollama) NavigateView(direction int) {
 
 func (gollama Gollama) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
-	case tea.KeyMsg:
-		gollama.copiedToClipboard = false
-		// If the user presses q or ctrl+c, we'll quit the program
-		switch msg.String() {
-		case "ctrl+c", "q":
-			gollama.state = quitState
-			return gollama, tea.Quit
-		case "c":
-			if len(gollama.views) > 0 {
-				gollama.CopyToClipboard()
-			}
-		case "left", "h":
-			if len(gollama.views) > 0 {
-				gollama.NavigateView(-1)
-			}
-			var cmd tea.Cmd
-			gollama.viewport, cmd = gollama.viewport.Update(msg)
-			return gollama, cmd
-		case "right", "l":
-			if len(gollama.views) > 0 {
-				gollama.NavigateView(1)
-			}
-			var cmd tea.Cmd
-			gollama.viewport, cmd = gollama.viewport.Update(msg)
-			return gollama, cmd
-		default:
-			if gollama.state == responseState {
-				return gollama, nil
-			}
-			var cmd tea.Cmd
-			gollama.viewport, cmd = gollama.viewport.Update(msg)
-			return gollama, cmd
-		}
 	case api.ResultMsg:
 		if msg.Done {
 			gollama.state = doneState
@@ -206,6 +173,42 @@ func (gollama Gollama) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		var cmd tea.Cmd
 		gollama.spinner, cmd = gollama.spinner.Update(msg)
 		return gollama, cmd
+	case tea.KeyMsg:
+		if gollama.state == responseState {
+			return gollama, nil
+		}
+		gollama.copiedToClipboard = false
+		// If the user presses q or ctrl+c, we'll quit the program
+		switch msg.String() {
+		case "ctrl+c", "q":
+			gollama.state = quitState
+			return gollama, tea.Quit
+		case "c":
+			if len(gollama.views) > 0 {
+				gollama.CopyToClipboard()
+			}
+		case "left", "h":
+			if len(gollama.views) > 0 {
+				gollama.NavigateView(-1)
+			}
+			var cmd tea.Cmd
+			gollama.viewport, cmd = gollama.viewport.Update(msg)
+			return gollama, cmd
+		case "right", "l":
+			if len(gollama.views) > 0 {
+				gollama.NavigateView(1)
+			}
+			var cmd tea.Cmd
+			gollama.viewport, cmd = gollama.viewport.Update(msg)
+			return gollama, cmd
+		default:
+			if gollama.state == responseState {
+				return gollama, nil
+			}
+			var cmd tea.Cmd
+			gollama.viewport, cmd = gollama.viewport.Update(msg)
+			return gollama, cmd
+		}
 	default:
 		return gollama, nil
 	}
@@ -241,7 +244,10 @@ func (gollama Gollama) helpView() string {
 				len(gollama.views),
 			),
 		)
+	} else {
+		helpViewStr = fmt.Sprintf(helpViewStr, "")
 	}
+
 	if gollama.copiedToClipboard {
 		helpViewStr = helpViewStr + "  Copied to clipboard!\n"
 	}

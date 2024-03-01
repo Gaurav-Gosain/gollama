@@ -35,7 +35,6 @@ func main() {
 		}
 	} else {
 		err := gollama.RunPromptForm()
-
 		if err != nil {
 			fmt.Println("Error running form:", err.Error())
 			return
@@ -50,7 +49,7 @@ func main() {
 		p = tea.NewProgram(
 			gollamaTUI,
 			// TODO: decide if we want to use the altscreen or not
-			tea.WithAltScreen(), // Use the altscreen.
+			// tea.WithAltScreen(), // Use the altscreen.
 		)
 	}
 
