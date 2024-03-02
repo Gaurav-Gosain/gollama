@@ -13,7 +13,8 @@ Gollama is a delightful tool that brings Ollama, your offline conversational AI 
 
 ### Prerequisites
 
-- [Ollama](https://ollama.com/) installed on your system.
+- [Go programming language](https://go.dev/)
+- [Ollama](https://ollama.com/)
 
 ### Installation
 
