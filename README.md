@@ -15,6 +15,7 @@ Gollama is a delightful tool that brings [Ollama](https://ollama.com/), your off
 
 - [Go](https://go.dev/) installed on your system.
 - [Ollama](https://ollama.com/) installed on your system or a gollama API server accessible from your machine. (Default: `http://localhost:11434`) Read more about customizing the base URL [here](#options).
+- Atleast one model installed on your Ollama server. You can install models using the `ollama pull <model-name>` command. To find a list of all available models, check the [Ollama Library](https://ollama.com/library/). You can also use the `ollama list` command to list all locally installed models.
 
 ### Installation
 
