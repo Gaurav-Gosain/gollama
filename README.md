@@ -19,6 +19,23 @@ Gollama is a delightful tool that brings [Ollama](https://ollama.com/), your off
 
 ### Installation
 
+You can install Gollama using one of the following methods:
+
+#### Download the latest release
+
+Grab the latest release from the [releases page](https://github.com/Gaurav-Gosain/gollama/releases) and extract the archive to a location of your choice.
+
+#### Install using Go
+
+You can also install Gollama using the `go install` command:
+
+```bash
+go install github.com/gaurav-gosain/gollama@latest
+```
+#### Build from source
+
+If you prefer to build from source, follow these steps:
+
 1. Clone the repository:
 
    ```bash
@@ -42,7 +59,12 @@ Gollama is a delightful tool that brings [Ollama](https://ollama.com/), your off
 1. Run the executable:
 
    ```bash
-   ./gollama
+   gollama
+   ```
+    or 
+
+   ```bash
+   /path/to/gollama
    ```
 
 2. Follow the on-screen instructions to interact with Gollama.
