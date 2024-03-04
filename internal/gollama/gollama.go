@@ -51,7 +51,7 @@ func (gollama *Gollama) Run() {
 		gollama.Generate()
 	}()
 
-	if !gollama.Config.PipedMode && !gollama.Config.Raw {
+	if !gollama.Config.Raw {
 		resModel, err := gollama.Program.Run()
 		if err != nil {
 			fmt.Println("Error running program:", err)

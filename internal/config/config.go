@@ -49,6 +49,8 @@ func (c *Config) GetPipedInput() {
 	// Check if there is data available to read
 	if (fileInfo.Mode()&os.ModeNamedPipe != 0) || (fileInfo.Mode()&os.ModeCharDevice == 0) {
 		c.PipedMode = true
+		c.Raw = true
+
 		pipedData, err := io.ReadAll(os.Stdin)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "error reading standard input: %v\n", err)
@@ -124,10 +126,8 @@ type Payload struct {
 }
 
 func (c *Config) RunPromptForm() (err error) {
-	if c.PipedMode {
-		if c.ModelName == "" {
-			return errors.New("model name can't be empty when running in piped mode")
-		}
+	if c.PipedMode && c.ModelName == "" {
+		return errors.New("model name can't be empty when running in piped mode")
 	}
 
 	fields, err := c.GetFormFields()
@@ -187,14 +187,14 @@ func (c *Config) Generate(p *tea.Program) {
 			return
 		}
 
-		if !c.PipedMode && !c.Raw {
-			p.Send(resp)
-		} else {
+		if c.Raw {
 			fmt.Print(resp.Response)
+		} else {
+			p.Send(resp)
 		}
 
 		if resp.Done {
-			if c.PipedMode || c.Raw {
+			if c.Raw {
 				fmt.Println()
 			}
 			break

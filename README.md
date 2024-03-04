@@ -13,6 +13,7 @@ Gollama is a delightful tool that brings Ollama, your offline conversational AI 
 
 ### Prerequisites
 
+- [Go](https://go.dev/) installed on your system.
 - [Ollama](https://ollama.com/) installed on your system.
 
 ### Installation
@@ -47,10 +48,25 @@ Gollama is a delightful tool that brings Ollama, your offline conversational AI 
 
 ### Options
 
+- `--help`: Display the help message.
+- `--base-url`: Specify a custom base URL for the Ollama server.
 - `--prompt`: Specify a custom prompt for generating responses.
 - `--model`: Choose a specific model for response generation.
-- `--piped`: Enable piped mode for automated usage.
+  > List of available ollama models can be found using the `ollama list` command.
 - `--raw`: Enable raw output mode for unformatted responses.
+
+```bash
+> gollama --help
+Usage of gollama:
+  -base-url string
+        Base URL for the API server (default "http://localhost:11434")
+  -model string
+        Model to use for generation
+  -prompt string
+        Prompt to use for generation
+  -raw
+        Enable raw output
+```
 
 ## 📖 Examples
 
@@ -61,14 +77,14 @@ Gollama is a delightful tool that brings Ollama, your offline conversational AI 
 ### Piped Mode
 
 > [!NOTE]
-> Piping into gollama isn't implemented yet.
+> Piping into gollama automatically turns on `--raw` output mode.
 
 ```bash
-echo "Once upon a time" | ./gollama --model="llama2" --prompt="prompt goes here" --piped
+echo "Once upon a time" | ./gollama --model="llama2" --prompt="prompt goes here"
 ```
 
 ```bash
-./gollama --model="llama2" --prompt="prompt goes here"
+./gollama --model="llama2" --prompt="prompt goes here" < input.txt
 ```
 
 ## 📦 Dependencies
@@ -83,9 +99,10 @@ Gollama relies on the following third-party packages:
 ## 🗺️ Roadmap
 
 - [x] Implement piped mode for automated usage.
-- [ ] Add support for downloading models directly from Ollama using the rest API.
 - [x] Add support for extracting codeblocks from the generated responses.
 - [x] Add ability to copy responses/codeblocks to clipboard.
+- [ ] GitHub Actions for automated releases.
+- [ ] Add support for downloading models directly from Ollama using the rest API.
 
 ## 🤝 Contribution
 
