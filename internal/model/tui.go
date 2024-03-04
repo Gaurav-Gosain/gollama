@@ -41,7 +41,7 @@ var spinners = []spinner.Spinner{
 
 var helpStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("241")).Render
 
-type Gollama struct {
+type TUI struct {
 	renderer          *glamour.TermRenderer
 	model             string
 	prompt            string
@@ -55,7 +55,7 @@ type Gollama struct {
 	copiedToClipboard bool
 }
 
-func (gollama *Gollama) FindCodeBlocks() {
+func (gollama *TUI) FindCodeBlocks() {
 	var codeBlocks []string
 
 	codeBlocks = append(codeBlocks, gollama.output)
@@ -77,7 +77,7 @@ func InitSpinner() spinner.Model {
 	return s
 }
 
-func NewModel(config *config.Config) (*Gollama, error) {
+func NewModel(config *config.Config) (*TUI, error) {
 	out := fmt.Sprintf("# Prompt\n`%s`\n# Response\n", config.Prompt)
 
 	title, _ := glamour.Render(out, "dark")
@@ -98,7 +98,7 @@ func NewModel(config *config.Config) (*Gollama, error) {
 		return nil, err
 	}
 
-	return &Gollama{
+	return &TUI{
 		model:    config.ModelName,
 		prompt:   config.Prompt,
 		spinner:  InitSpinner(),
@@ -109,11 +109,11 @@ func NewModel(config *config.Config) (*Gollama, error) {
 	}, nil
 }
 
-func (gollama Gollama) Init() tea.Cmd {
+func (gollama TUI) Init() tea.Cmd {
 	return gollama.spinner.Tick
 }
 
-func (gollama *Gollama) CopyToClipboard() {
+func (gollama *TUI) CopyToClipboard() {
 	// cross-platform clipboard copy
 	err := clipboard.Init()
 	if err != nil {
@@ -125,7 +125,7 @@ func (gollama *Gollama) CopyToClipboard() {
 	gollama.copiedToClipboard = true
 }
 
-func (gollama *Gollama) NavigateView(direction int) {
+func (gollama *TUI) NavigateView(direction int) {
 	gollama.currentViewIndex += direction
 	if gollama.currentViewIndex < 0 {
 		gollama.currentViewIndex = len(gollama.views) - 1
@@ -139,7 +139,7 @@ func (gollama *Gollama) NavigateView(direction int) {
 	gollama.viewport.GotoTop()
 }
 
-func (gollama Gollama) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (gollama TUI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case api.ResultMsg:
 		if msg.Done {
@@ -216,7 +216,7 @@ func (gollama Gollama) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return gollama, nil
 }
 
-func (gollama Gollama) View() (render string) {
+func (gollama TUI) View() (render string) {
 	switch gollama.state {
 	case startState:
 		out, _ := glamour.Render(fmt.Sprintf("Waiting for response from `%s` model...", gollama.model), "dark")
@@ -232,7 +232,7 @@ func (gollama Gollama) View() (render string) {
 	}
 }
 
-func (gollama Gollama) helpView() string {
+func (gollama TUI) helpView() string {
 	helpViewStr := "\n  ↑/↓: Navigate • q: Quit • c: Copy %s\n"
 
 	if len(gollama.views) > 1 {
@@ -254,7 +254,7 @@ func (gollama Gollama) helpView() string {
 	return helpStyle(helpViewStr)
 }
 
-func FinalResponse(gollama Gollama) string {
+func FinalResponse(gollama TUI) string {
 	var out string
 
 	out, _ = glamour.Render(gollama.output, "dark")

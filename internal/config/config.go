@@ -5,6 +5,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 
@@ -24,6 +25,7 @@ type Config struct {
 	Prompt    string
 	ModelName string
 	BaseURL   string
+	PipedText string
 	PipedMode bool
 	Raw       bool
 }
@@ -31,25 +33,37 @@ type Config struct {
 func NewConfig() *Config {
 	config := Config{}
 	config.ParseCLIArgs()
+	config.GetPipedInput()
 	config.ApiClient = api.NewApiClient(config.BaseURL)
 
 	return &config
 }
 
-func (c *Config) ParseCLIArgs() {
+func (c *Config) GetPipedInput() {
 	fileInfo, err := os.Stdin.Stat()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error getting standard input information: %v\n", err)
 		os.Exit(1)
 	}
 
-	c.PipedMode = true
-
 	// Check if there is data available to read
-	if (fileInfo.Mode()&os.ModeNamedPipe == 0) && (fileInfo.Mode()&os.ModeCharDevice != 0) {
-		c.PipedMode = false
-	}
+	if (fileInfo.Mode()&os.ModeNamedPipe != 0) || (fileInfo.Mode()&os.ModeCharDevice == 0) {
+		c.PipedMode = true
+		pipedData, err := io.ReadAll(os.Stdin)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error reading standard input: %v\n", err)
+			os.Exit(1)
+		}
 
+		if c.Prompt == "" {
+			c.Prompt = string(pipedData)
+		} else {
+			c.Prompt = fmt.Sprintf("Context: %s\n\nQuestion: %s", pipedData, c.Prompt)
+		}
+	}
+}
+
+func (c *Config) ParseCLIArgs() {
 	// Parse command line flags
 	flag.BoolVar(&c.Raw, "raw", BOOL_DEFAULT, "Enable raw output")
 	flag.StringVar(&c.Prompt, "prompt", STRING_DEFAULT, "Prompt to use for generation")
@@ -110,6 +124,12 @@ type Payload struct {
 }
 
 func (c *Config) RunPromptForm() (err error) {
+	if c.PipedMode {
+		if c.ModelName == "" {
+			return errors.New("model name can't be empty when running in piped mode")
+		}
+	}
+
 	fields, err := c.GetFormFields()
 	if err != nil {
 		return err
