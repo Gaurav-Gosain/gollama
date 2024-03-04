@@ -1,6 +1,6 @@
 # 🤖 Gollama: Ollama in your terminal, Your Offline AI Copilot 🦙
 
-Gollama is a delightful tool that brings Ollama, your offline conversational AI companion, directly into your terminal. It provides a fun and interactive way to generate responses from various models without needing internet connectivity. Whether you're brainstorming ideas, exploring creative writing, or just looking for inspiration, Gollama is here to assist you.
+Gollama is a delightful tool that brings [Ollama](https://ollama.com/), your offline conversational AI companion, directly into your terminal. It provides a fun and interactive way to generate responses from various models without needing internet connectivity. Whether you're brainstorming ideas, exploring creative writing, or just looking for inspiration, Gollama is here to assist you.
 
 ## 🌟 Features
 
