@@ -14,7 +14,7 @@ Gollama is a delightful tool that brings Ollama, your offline conversational AI 
 ### Prerequisites
 
 - [Go](https://go.dev/) installed on your system.
-- [Ollama](https://ollama.com/) installed on your system.
+- [Ollama](https://ollama.com/) installed on your system or a gollama API server accessible from your machine. (Default: `http://localhost:11434`) Read more about customizing the base URL [here](#options).
 
 ### Installation
 
