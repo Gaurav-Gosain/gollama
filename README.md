@@ -2,6 +2,8 @@
 
 Gollama is a delightful tool that brings [Ollama](https://ollama.com/), your offline conversational AI companion, directly into your terminal. It provides a fun and interactive way to generate responses from various models without needing internet connectivity. Whether you're brainstorming ideas, exploring creative writing, or just looking for inspiration, Gollama is here to assist you.
 
+![Gollama](assets/gollama.jpg)
+
 ## 🌟 Features
 
 - **Interactive Interface**: Enjoy a seamless user experience with intuitive interface powered by [Bubble Tea](https://github.com/charmbracelet/bubbletea).
