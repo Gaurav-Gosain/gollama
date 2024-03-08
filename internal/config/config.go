@@ -166,17 +166,22 @@ func (c *Config) RunPromptForm() (err error) {
 	}
 
 	if pickFile {
-		img, err := imagepicker.Init()
-		if err != nil {
-			return err
+		satisfied := false
+
+		for !satisfied {
+			img, err := imagepicker.Init()
+			if err != nil {
+				return err
+			}
+
+			if img.Quitting {
+				return errors.New("user quit the file picker")
+			}
+
+			c.ImagePath = img.SelectedFile
+
+			huh.NewConfirm().Value(&satisfied).Title(fmt.Sprintf("Selected file: %s", c.ImagePath)).Run()
 		}
-
-		if img.Quitting {
-			return errors.New("user quit the file picker")
-		}
-
-		c.ImagePath = img.SelectedFile
-
 	}
 
 	if len(fields) > 0 {
