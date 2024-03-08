@@ -80,7 +80,9 @@ If you prefer to build from source, follow these steps:
 
 > [!NOTE]
 > The following options for multimodal models are also available, but are expermintal and may not work as expected
-> The responses are also slower than the normal models
+
+> [!WARNING] 
+> The responses for multimodal llms are slower than the normal models (also depends on the size of the attached image)
 
 - `--attach-image`: Allow attaching an image to the prompt.
   > This option is automatically set to true if an image path is provided.
@@ -124,7 +126,7 @@ echo "Once upon a time" | ./gollama --model="llama2" --prompt="prompt goes here"
 
 ### CLI Mode with Image
 
-> [!INFO]
+> [!TIP]
 > Different combinations of flags can be used as per your requirements.
 
 ```bash
