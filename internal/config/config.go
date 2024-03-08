@@ -1,17 +1,22 @@
 package config
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
+	"path/filepath"
+	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/huh"
 	"github.com/gaurav-gosain/gollama/internal/api"
+	"github.com/gaurav-gosain/gollama/internal/imagepicker"
 )
 
 const (
@@ -21,13 +26,16 @@ const (
 
 // Config represents the configuration options for the program
 type Config struct {
-	ApiClient *api.ApiClient
-	Prompt    string
-	ModelName string
-	BaseURL   string
-	PipedText string
-	PipedMode bool
-	Raw       bool
+	ApiClient  *api.ApiClient
+	Prompt     string
+	ModelName  string
+	BaseURL    string
+	PipedText  string
+	ImagePath  string
+	Images     []string
+	MultiModal bool
+	PipedMode  bool
+	Raw        bool
 }
 
 func NewConfig() *Config {
@@ -68,11 +76,28 @@ func (c *Config) GetPipedInput() {
 func (c *Config) ParseCLIArgs() {
 	// Parse command line flags
 	flag.BoolVar(&c.Raw, "raw", BOOL_DEFAULT, "Enable raw output")
+	flag.BoolVar(
+		&c.MultiModal,
+		"attach-image",
+		BOOL_DEFAULT,
+		"Allow attaching an image (automatically set to true if an image path is provided)",
+	)
 	flag.StringVar(&c.Prompt, "prompt", STRING_DEFAULT, "Prompt to use for generation")
-	flag.StringVar(&c.ModelName, "model", STRING_DEFAULT, "Model to use for generation")
 	flag.StringVar(&c.BaseURL, "base-url", "http://localhost:11434", "Base URL for the API server")
+	flag.StringVar(&c.ImagePath, "image", STRING_DEFAULT, "Path to the image file to attach (png/jpg/jpeg)")
+	flag.StringVar(&c.ModelName, "model", STRING_DEFAULT, "Model to use for generation")
 
 	flag.Parse()
+
+	// if path starts with `~` then expand it to the home directory
+	if strings.HasPrefix(c.ImagePath, "~/") {
+		dirname, _ := os.UserHomeDir()
+		c.ImagePath = filepath.Join(dirname, c.ImagePath[2:])
+	}
+
+	if c.ImagePath != STRING_DEFAULT {
+		c.MultiModal = true
+	}
 }
 
 func validate(s string) error {
@@ -88,15 +113,15 @@ func validate(s string) error {
 	return nil
 }
 
-func (c *Config) GetFormFields() (fields []huh.Field, err error) {
+func (c *Config) GetFormFields() (fields []huh.Field, pickFile bool, err error) {
 	if c.PipedMode {
-		return fields, nil
+		return fields, false, nil
 	}
 
 	if c.ModelName == STRING_DEFAULT {
 		modelNames, err := c.ApiClient.OllamaModelNames()
 		if err != nil {
-			return nil, err
+			return nil, false, err
 		}
 		c.ModelName = modelNames[0]
 		fields = append(fields, huh.NewSelect[string]().
@@ -117,12 +142,17 @@ func (c *Config) GetFormFields() (fields []huh.Field, err error) {
 		)
 	}
 
-	return fields, nil
+	if c.MultiModal && c.ImagePath == STRING_DEFAULT {
+		pickFile = true
+	}
+
+	return fields, pickFile, nil
 }
 
 type Payload struct {
-	Model  string `json:"model"`
-	Prompt string `json:"prompt"`
+	Model  string   `json:"model"`
+	Prompt string   `json:"prompt"`
+	Images []string `json:"images"`
 }
 
 func (c *Config) RunPromptForm() (err error) {
@@ -130,12 +160,33 @@ func (c *Config) RunPromptForm() (err error) {
 		return errors.New("model name can't be empty when running in piped mode")
 	}
 
-	fields, err := c.GetFormFields()
+	fields, pickFile, err := c.GetFormFields()
 	if err != nil {
 		return err
 	}
 
+	if pickFile {
+		img, err := imagepicker.Init()
+		if err != nil {
+			return err
+		}
+
+		if img.Quitting {
+			return errors.New("user quit the file picker")
+		}
+
+		c.ImagePath = img.SelectedFile
+
+	}
+
 	if len(fields) > 0 {
+
+		if c.ImagePath != STRING_DEFAULT {
+			fields = append([]huh.Field{
+				huh.NewNote().
+					Title(fmt.Sprintf("Selected file: %s", c.ImagePath)),
+			}, fields...)
+		}
 
 		form := huh.NewForm(
 			huh.NewGroup(
@@ -149,6 +200,18 @@ func (c *Config) RunPromptForm() (err error) {
 		}
 	}
 
+	if c.MultiModal && c.ImagePath != STRING_DEFAULT {
+		bytes, err := os.ReadFile(c.ImagePath)
+		if err != nil {
+			log.Fatal(err)
+			os.Exit(1)
+		}
+
+		base64Encoding := base64.StdEncoding.EncodeToString(bytes)
+
+		c.Images = []string{base64Encoding}
+	}
+
 	return
 }
 
@@ -156,6 +219,7 @@ func (c *Config) Generate(p *tea.Program) {
 	newPayload := Payload{
 		Model:  c.ModelName,
 		Prompt: c.Prompt,
+		Images: c.Images,
 	}
 
 	payloadBytes, err := json.Marshal(newPayload)

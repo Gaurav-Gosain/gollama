@@ -3,6 +3,7 @@ package model
 import (
 	"fmt"
 	"math/rand"
+	"os"
 	"regexp"
 
 	"github.com/charmbracelet/bubbles/spinner"
@@ -22,6 +23,7 @@ const (
 	responseState
 	doneState
 	quitState
+	forceQuitState
 )
 
 var spinners = []spinner.Spinner{
@@ -175,6 +177,13 @@ func (gollama TUI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return gollama, cmd
 	case tea.KeyMsg:
 		if gollama.state == responseState {
+			switch msg.String() {
+			case "ctrl+c", "q":
+				gollama.state = forceQuitState
+				// return gollama, tea.Quit
+				// TODO: figure out how to cleanly exit the program when the user presses ctrl+c
+				os.Exit(1)
+			}
 			return gollama, nil
 		}
 		gollama.copiedToClipboard = false

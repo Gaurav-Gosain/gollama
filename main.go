@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/gaurav-gosain/gollama/internal/gollama"
 )
@@ -10,10 +9,12 @@ import (
 func main() {
 	gollama := &gollama.Gollama{}
 	err := gollama.Init()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "error initializing gollama: %s\n", err.Error())
-		os.Exit(1)
-	}
+	gollama.PrintError(err, true)
 
-	gollama.Run()
+	response, err := gollama.Run()
+	gollama.PrintError(err, true)
+
+	if !gollama.Config.Raw {
+		fmt.Println(response)
+	}
 }

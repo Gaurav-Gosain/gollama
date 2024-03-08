@@ -78,11 +78,23 @@ If you prefer to build from source, follow these steps:
   > List of available ollama models can be found using the `ollama list` command.
 - `--raw`: Enable raw output mode for unformatted responses.
 
+> [!NOTE]
+> The following options for multimodal models are also available, but are expermintal and may not work as expected
+> The responses are also slower than the normal models
+
+- `--attach-image`: Allow attaching an image to the prompt.
+  > This option is automatically set to true if an image path is provided.
+- `--image`: Path to the image file to attach (png/jpg/jpeg).
+
 ```bash
 > gollama --help
 Usage of gollama:
+  -attach-image
+        Allow attaching an image (automatically set to true if an image path is provided)
   -base-url string
         Base URL for the API server (default "http://localhost:11434")
+  -image string
+        Path to the image file to attach (png/jpg/jpeg)
   -model string
         Model to use for generation
   -prompt string
@@ -108,6 +120,21 @@ echo "Once upon a time" | ./gollama --model="llama2" --prompt="prompt goes here"
 
 ```bash
 ./gollama --model="llama2" --prompt="prompt goes here" < input.txt
+```
+
+### CLI Mode with Image
+
+> [!INFO]
+> Different combinations of flags can be used as per your requirements.
+
+```bash
+./gollama --model="llava:latest" --prompt="prompt goes here" --image="path/to/image.png" --raw
+```
+
+### TUI Mode with Image
+
+```bash
+./gollama --attach-image
 ```
 
 ## 📦 Dependencies

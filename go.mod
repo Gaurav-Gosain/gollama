@@ -11,9 +11,11 @@ require (
 )
 
 require (
-	golang.org/x/exp v0.0.0-20190731235908-ec7cb31e5a56 // indirect
-	golang.org/x/image v0.6.0 // indirect
-	golang.org/x/mobile v0.0.0-20230301163155-e0f57694e12c // indirect
+	github.com/dustin/go-humanize v1.0.1 // indirect
+	github.com/stretchr/testify v1.8.4 // indirect
+	golang.org/x/exp/shiny v0.0.0-20240222234643-814bf88cf225 // indirect
+	golang.org/x/image v0.14.0 // indirect
+	golang.org/x/mobile v0.0.0-20231127183840-76ac6878050a // indirect
 )
 
 require (
@@ -40,8 +42,8 @@ require (
 	github.com/yuin/goldmark-emoji v1.0.1 // indirect
 	golang.design/x/clipboard v0.7.0
 	golang.org/x/net v0.6.0 // indirect
-	golang.org/x/sync v0.4.0 // indirect
-	golang.org/x/sys v0.13.0 // indirect
+	golang.org/x/sync v0.5.0 // indirect
+	golang.org/x/sys v0.15.0 // indirect
 	golang.org/x/term v0.13.0 // indirect
-	golang.org/x/text v0.13.0 // indirect
+	golang.org/x/text v0.14.0 // indirect
 )
