@@ -51,6 +51,8 @@ cd gollama
 ```
 3. Build the docker image:
 
+> [!NOTE]
+> The following command will build the docker image with the tag `gollama`. You can replace `gollama` with any tag of your choice.
 ```bash
 docker build -t gollama .
 ```
