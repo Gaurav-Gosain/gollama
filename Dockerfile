@@ -13,7 +13,7 @@ RUN go mod download &&\
 FROM gcr.io/distroless/static-debian11:nonroot
 
 ENV TERM=xterm-256color
-COPY --from=ollama-build /go/bin/gollama /
+COPY --from=gollama-build /go/bin/gollama /
 ENTRYPOINT ["/gollama"]
 
 
