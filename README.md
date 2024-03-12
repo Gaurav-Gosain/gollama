@@ -34,40 +34,66 @@ You can also install Gollama using the `go install` command:
 ```bash
 go install github.com/gaurav-gosain/gollama@latest
 ```
+
+#### Run using Docker
+
+You can also run gollama using docker:
+
+1. Clone the repository:
+
+```bash
+git clone https://github.com/Gaurav-Gosain/gollama.git
+```
+2. Navigate to the project directory:
+
+```bash
+cd gollama
+```
+3. Build the docker image:
+
+```bash
+docker build -t gollama .
+```
+4. Run the docker image:
+
+```bash
+docker run --net=host -it gollama
+```
+
 #### Build from source
 
 If you prefer to build from source, follow these steps:
 
 1. Clone the repository:
 
-   ```bash
-   git clone https://github.com/Gaurav-Gosain/gollama.git
-   ```
+```bash
+git clone https://github.com/Gaurav-Gosain/gollama.git
+```
 
 2. Navigate to the project directory:
 
-   ```bash
-   cd gollama
-   ```
+```bash
+cd gollama
+```
 
 3. Build the executable:
 
-   ```bash
-   go build
-   ```
+```bash
+go build
+```
 
 ### Usage
 
 1. Run the executable:
 
-   ```bash
-   gollama
-   ```
-    or 
+```bash
+gollama
+```
+or 
 
-   ```bash
-   /path/to/gollama
-   ```
+```bash
+/path/to/gollama
+```
 
 2. Follow the on-screen instructions to interact with Gollama.
 
