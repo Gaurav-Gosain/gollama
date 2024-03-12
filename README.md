@@ -37,7 +37,13 @@ go install github.com/gaurav-gosain/gollama@latest
 
 #### Run using Docker
 
-You can also run gollama using docker:
+You can pull the latest docker image from the [Github Docker Container Registry](https://github.com/Gaurav-Gosain/gollama/pkgs/container/gollama) and run it using the following command:
+
+```bash
+docker run --net=host -it ghcr.io/gaurav-gosain/gollama:main
+```
+
+You can also run gollama locally using docker:
 
 1. Clone the repository:
 
