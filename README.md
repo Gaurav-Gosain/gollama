@@ -198,7 +198,7 @@ Contributions are welcome! Whether you want to add new features, fix bugs, or im
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=Gaurav-Gosain/gollama&type=Date)](https://star-history.com/#Gaurav-Gosain/gollama&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=Gaurav-Gosain/gollama&type=Date&theme=dark)](https://star-history.com/#Gaurav-Gosain/gollama&Date)
 
 <div style="display:flex;flex-wrap:wrap;">
   <img alt="GitHub Language Count" src="https://img.shields.io/github/languages/count/Gaurav-Gosain/gollama" style="padding:5px;margin:5px;" />
