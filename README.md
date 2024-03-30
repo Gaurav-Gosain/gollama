@@ -1,23 +1,38 @@
 # 🤖 Gollama: Ollama in your terminal, Your Offline AI Copilot 🦙
 
-Gollama is a delightful tool that brings [Ollama](https://ollama.com/), your offline conversational AI companion, directly into your terminal. It provides a fun and interactive way to generate responses from various models without needing internet connectivity. Whether you're brainstorming ideas, exploring creative writing, or just looking for inspiration, Gollama is here to assist you.
+Gollama is a delightful tool that brings [Ollama](https://ollama.com/),
+your offline conversational AI companion, directly into your terminal.
+It provides a fun and interactive way to generate responses from various models
+without needing internet connectivity. Whether you're brainstorming ideas,
+exploring creative writing, or just looking for inspiration,
+Gollama is here to assist you.
 
 ![Gollama](assets/gollama.jpg)
 
 ## 🌟 Features
 
-- **Interactive Interface**: Enjoy a seamless user experience with intuitive interface powered by [Bubble Tea](https://github.com/charmbracelet/bubbletea).
-- **Customizable Prompts**: Tailor your prompts to get precisely the responses you need.
-- **Multiple Models**: Choose from a variety of models to generate responses that suit your requirements.
-- **Visual Feedback**: Stay engaged with visual cues like spinners and formatted output.
+- **Interactive Interface**: Enjoy a seamless user experience with
+  intuitive interface powered by [Bubble Tea](https://github.com/charmbracelet/bubbletea).
+- **Customizable Prompts**: Tailor your prompts to get precisely the responses
+  you need.
+- **Multiple Models**: Choose from a variety of models to generate responses
+  that suit your requirements.
+- **Visual Feedback**: Stay engaged with visual cues like spinners and
+  formatted output.
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 
 - [Go](https://go.dev/) installed on your system.
-- [Ollama](https://ollama.com/) installed on your system or a gollama API server accessible from your machine. (Default: `http://localhost:11434`) Read more about customizing the base URL [here](#options).
-- Atleast one model installed on your Ollama server. You can install models using the `ollama pull <model-name>` command. To find a list of all available models, check the [Ollama Library](https://ollama.com/library/). You can also use the `ollama list` command to list all locally installed models.
+- [Ollama](https://ollama.com/) installed on your system or a gollama API server
+  accessible from your machine. (Default: `http://localhost:11434`)
+  Read more about customizing the base URL [here](#options).
+- Atleast one model installed on your Ollama server. You can install models
+  using the `ollama pull <model-name>` command.
+  To find a list of all available models,
+  check the [Ollama Library](https://ollama.com/library/).
+  You can also use the `ollama list` command to list all locally installed models.
 
 ### Installation
 
@@ -25,7 +40,9 @@ You can install Gollama using one of the following methods:
 
 #### Download the latest release
 
-Grab the latest release from the [releases page](https://github.com/Gaurav-Gosain/gollama/releases) and extract the archive to a location of your choice.
+Grab the latest release from the
+[releases page](https://github.com/Gaurav-Gosain/gollama/releases) and extract
+the archive to a location of your choice.
 
 #### Install using Go
 
@@ -37,7 +54,9 @@ go install github.com/gaurav-gosain/gollama@latest
 
 #### Run using Docker
 
-You can pull the latest docker image from the [Github Docker Container Registry](https://github.com/Gaurav-Gosain/gollama/pkgs/container/gollama) and run it using the following command:
+You can pull the latest docker image from the
+[Github Docker Container Registry](https://github.com/Gaurav-Gosain/gollama/pkgs/container/gollama)
+and run it using the following command:
 
 ```bash
 docker run --net=host -it ghcr.io/gaurav-gosain/gollama:latest
@@ -50,18 +69,23 @@ You can also run gollama locally using docker:
 ```bash
 git clone https://github.com/Gaurav-Gosain/gollama.git
 ```
+
 2. Navigate to the project directory:
 
 ```bash
 cd gollama
 ```
+
 3. Build the docker image:
 
 > [!NOTE]
-> The following command will build the docker image with the tag `gollama`. You can replace `gollama` with any tag of your choice.
+> The following command will build the docker image with the tag `gollama`.
+> You can replace `gollama` with any tag of your choice.
+
 ```bash
 docker build -t gollama .
 ```
+
 4. Run the docker image:
 
 ```bash
@@ -97,7 +121,8 @@ go build
 ```bash
 gollama
 ```
-or 
+
+or
 
 ```bash
 /path/to/gollama
@@ -117,7 +142,7 @@ or
 > [!NOTE]
 > The following options for multimodal models are also available, but are expermintal and may not work as expected
 
-> [!WARNING] 
+> [!WARNING]
 > The responses for multimodal llms are slower than the normal models (also depends on the size of the attached image)
 
 - `--attach-image`: Allow attaching an image to the prompt.
@@ -179,10 +204,14 @@ echo "Once upon a time" | ./gollama --model="llama2" --prompt="prompt goes here"
 
 Gollama relies on the following third-party packages:
 
-- [bubbletea](https://github.com/charmbracelet/bubbletea): A library for building terminal applications using the Model-Update-View pattern.
-- [glamour](https://github.com/charmbracelet/glamour): A markdown rendering library for the terminal.
-- [huh](https://github.com/charmbracelet/huh): A library for building terminal-based forms and surveys.
-- [lipgloss](https://github.com/charmbracelet/lipgloss): A library for styling text output in the terminal.
+- [bubbletea](https://github.com/charmbracelet/bubbletea):
+  A library for building terminal applications using the Model-Update-View pattern.
+- [glamour](https://github.com/charmbracelet/glamour):
+  A markdown rendering library for the terminal.
+- [huh](https://github.com/charmbracelet/huh):
+  A library for building terminal-based forms and surveys.
+- [lipgloss](https://github.com/charmbracelet/lipgloss):
+  A library for styling text output in the terminal.
 
 ## 🗺️ Roadmap
 
@@ -194,7 +223,8 @@ Gollama relies on the following third-party packages:
 
 ## 🤝 Contribution
 
-Contributions are welcome! Whether you want to add new features, fix bugs, or improve documentation, feel free to open a pull request.
+Contributions are welcome! Whether you want to add new features,
+fix bugs, or improve documentation, feel free to open a pull request.
 
 ## Star History
 
@@ -215,4 +245,5 @@ Contributions are welcome! Whether you want to add new features, fix bugs, or im
 
 ## 📜 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License -
+see the [LICENSE](LICENSE) file for details.
