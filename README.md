@@ -28,7 +28,7 @@ Gollama is here to assist you.
 - [Ollama](https://ollama.com/) installed on your system or a gollama API server
   accessible from your machine. (Default: `http://localhost:11434`)
   Read more about customizing the base URL [here](#options).
-- Atleast one model installed on your Ollama server. You can install models
+- At least one model installed on your Ollama server. You can install models
   using the `ollama pull <model-name>` command.
   To find a list of all available models,
   check the [Ollama Library](https://ollama.com/library/).
@@ -66,31 +66,31 @@ You can also run gollama locally using docker:
 
 1. Clone the repository:
 
-```bash
-git clone https://github.com/Gaurav-Gosain/gollama.git
-```
+   ```bash
+   git clone https://github.com/Gaurav-Gosain/gollama.git
+   ```
 
 2. Navigate to the project directory:
 
-```bash
-cd gollama
-```
+   ```bash
+   cd gollama
+   ```
 
 3. Build the docker image:
 
-> [!NOTE]
-> The following command will build the docker image with the tag `gollama`.
-> You can replace `gollama` with any tag of your choice.
+   > [!NOTE]
+   > The following command will build the docker image with the tag `gollama`.
+   > You can replace `gollama` with any tag of your choice.
 
-```bash
-docker build -t gollama .
-```
+   ```bash
+   docker build -t gollama .
+   ```
 
 4. Run the docker image:
 
-```bash
-docker run --net=host -it gollama
-```
+   ```bash
+   docker run --net=host -it gollama
+   ```
 
 #### Build from source
 
@@ -98,35 +98,35 @@ If you prefer to build from source, follow these steps:
 
 1. Clone the repository:
 
-```bash
-git clone https://github.com/Gaurav-Gosain/gollama.git
-```
+   ```bash
+   git clone https://github.com/Gaurav-Gosain/gollama.git
+   ```
 
 2. Navigate to the project directory:
 
-```bash
-cd gollama
-```
+   ```bash
+   cd gollama
+   ```
 
 3. Build the executable:
 
-```bash
-go build
-```
+   ```bash
+   go build
+   ```
 
 ### Usage
 
 1. Run the executable:
 
-```bash
-gollama
-```
+   ```bash
+   gollama
+   ```
 
-or
+   `or`
 
-```bash
-/path/to/gollama
-```
+   ```bash
+   /path/to/gollama
+   ```
 
 2. Follow the on-screen instructions to interact with Gollama.
 
@@ -139,11 +139,17 @@ or
   > List of available ollama models can be found using the `ollama list` command.
 - `--raw`: Enable raw output mode for unformatted responses.
 
+---
+
 > [!NOTE]
 > The following options for multimodal models are also available, but are expermintal and may not work as expected
 
+---
+
 > [!WARNING]
 > The responses for multimodal llms are slower than the normal models (also depends on the size of the attached image)
+
+---
 
 - `--attach-image`: Allow attaching an image to the prompt.
   > This option is automatically set to true if an image path is provided.
@@ -230,18 +236,27 @@ fix bugs, or improve documentation, feel free to open a pull request.
 
 [![Star History Chart](https://api.star-history.com/svg?repos=Gaurav-Gosain/gollama&type=Date&theme=dark)](https://star-history.com/#Gaurav-Gosain/gollama&Date)
 
-<div style="display:flex;flex-wrap:wrap;">
-  <img alt="GitHub Language Count" src="https://img.shields.io/github/languages/count/Gaurav-Gosain/gollama" style="padding:5px;margin:5px;" />
-  <img alt="GitHub Top Language" src="https://img.shields.io/github/languages/top/Gaurav-Gosain/gollama" style="padding:5px;margin:5px;" />
-  <img alt="" src="https://img.shields.io/github/repo-size/Gaurav-Gosain/gollama" style="padding:5px;margin:5px;" />
-  <img alt="GitHub Issues" src="https://img.shields.io/github/issues/Gaurav-Gosain/gollama" style="padding:5px;margin:5px;" />
-  <img alt="GitHub Closed Issues" src="https://img.shields.io/github/issues-closed/Gaurav-Gosain/gollama" style="padding:5px;margin:5px;" />
-  <img alt="GitHub Pull Requests" src="https://img.shields.io/github/issues-pr/Gaurav-Gosain/gollama" style="padding:5px;margin:5px;" />
-  <img alt="GitHub Closed Pull Requests" src="https://img.shields.io/github/issues-pr-closed/Gaurav-Gosain/gollama" style="padding:5px;margin:5px;" />
-  <img alt="GitHub Contributors" src="https://img.shields.io/github/contributors/Gaurav-Gosain/gollama" style="padding:5px;margin:5px;" />
-  <img alt="GitHub Last Commit" src="https://img.shields.io/github/last-commit/Gaurav-Gosain/gollama" style="padding:5px;margin:5px;" />
-  <img alt="GitHub Commit Activity (Week)" src="https://img.shields.io/github/commit-activity/w/Gaurav-Gosain/gollama" style="padding:5px;margin:5px;" />
-<div>
+<p style="display:flex;flex-wrap:wrap;"> <img alt="GitHub Language Count"
+src="https://img.shields.io/github/languages/count/Gaurav-Gosain/gollama"
+style="padding:5px;margin:5px;" /> <img alt="GitHub Top Language"
+src="https://img.shields.io/github/languages/top/Gaurav-Gosain/gollama"
+style="padding:5px;margin:5px;" /> <img alt="Repo Size"
+src="https://img.shields.io/github/repo-size/Gaurav-Gosain/gollama"
+style="padding:5px;margin:5px;" /> <img alt="GitHub Issues"
+src="https://img.shields.io/github/issues/Gaurav-Gosain/gollama"
+style="padding:5px;margin:5px;" /> <img alt="GitHub Closed Issues"
+src="https://img.shields.io/github/issues-closed/Gaurav-Gosain/gollama"
+style="padding:5px;margin:5px;" /> <img alt="GitHub Pull Requests"
+src="https://img.shields.io/github/issues-pr/Gaurav-Gosain/gollama"
+style="padding:5px;margin:5px;" /> <img alt="GitHub Closed Pull Requests"
+src="https://img.shields.io/github/issues-pr-closed/Gaurav-Gosain/gollama"
+style="padding:5px;margin:5px;" /> <img alt="GitHub Contributors"
+src="https://img.shields.io/github/contributors/Gaurav-Gosain/gollama"
+style="padding:5px;margin:5px;" /> <img alt="GitHub Last Commit"
+src="https://img.shields.io/github/last-commit/Gaurav-Gosain/gollama"
+style="padding:5px;margin:5px;" /> <img alt="GitHub Commit Activity (Week)"
+src="https://img.shields.io/github/commit-activity/w/Gaurav-Gosain/gollama"
+style="padding:5px;margin:5px;" /> </p>
 
 ## 📜 License
 
