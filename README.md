@@ -142,12 +142,14 @@ If you prefer to build from source, follow these steps:
 ---
 
 > [!NOTE]
-> The following options for multimodal models are also available, but are expermintal and may not work as expected
+> The following options for multimodal models are also available, but are
+> expermintal and may not work as expected
 
 ---
 
 > [!WARNING]
-> The responses for multimodal llms are slower than the normal models (also depends on the size of the attached image)
+> The responses for multimodal llms are slower than the normal models (also
+> depends on the size of the attached image)
 
 ---
 
@@ -197,7 +199,9 @@ echo "Once upon a time" | ./gollama --model="llama2" --prompt="prompt goes here"
 > Different combinations of flags can be used as per your requirements.
 
 ```bash
-./gollama --model="llava:latest" --prompt="prompt goes here" --image="path/to/image.png" --raw
+./gollama --model="llava:latest" \
+ --prompt="prompt goes here" \
+ --image="path/to/image.png" --raw
 ```
 
 ### TUI Mode with Image
