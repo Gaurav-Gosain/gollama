@@ -55,14 +55,14 @@ go install github.com/gaurav-gosain/gollama@latest
 #### Run using Docker
 
 You can pull the latest docker image from the
-[Github Docker Container Registry](https://github.com/Gaurav-Gosain/gollama/pkgs/container/gollama)
+[GitHub Docker Container Registry](https://github.com/Gaurav-Gosain/gollama/pkgs/container/gollama)
 and run it using the following command:
 
 ```bash
 docker run --net=host -it ghcr.io/gaurav-gosain/gollama:latest
 ```
 
-You can also run gollama locally using docker:
+You can also run Gollama locally using docker:
 
 1. Clone the repository:
 
@@ -136,19 +136,19 @@ If you prefer to build from source, follow these steps:
 - `--base-url`: Specify a custom base URL for the Ollama server.
 - `--prompt`: Specify a custom prompt for generating responses.
 - `--model`: Choose a specific model for response generation.
-  > List of available ollama models can be found using the `ollama list` command.
+  > List of available Ollama models can be found using the `ollama list` command.
 - `--raw`: Enable raw output mode for unformatted responses.
 
 ---
 
 > [!NOTE]
 > The following options for multimodal models are also available, but are
-> expermintal and may not work as expected
+> experimental and may not work as expected
 
 ---
 
 > [!WARNING]
-> The responses for multimodal llms are slower than the normal models (also
+> The responses for multimodal LLMs are slower than the normal models (also
 > depends on the size of the attached image)
 
 ---
@@ -183,7 +183,7 @@ Usage of gollama:
 ### Piped Mode
 
 > [!NOTE]
-> Piping into gollama automatically turns on `--raw` output mode.
+> Piping into Gollama automatically turns on `--raw` output mode.
 
 ```bash
 echo "Once upon a time" | ./gollama --model="llama2" --prompt="prompt goes here"

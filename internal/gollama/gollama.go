@@ -49,6 +49,10 @@ func (gollama *Gollama) Init() (err error) {
 		return
 	}
 
+	if gollama.Config.PipedMode || gollama.Config.Raw {
+		return
+	}
+
 	gollamaTUI, err := model.NewModel(gollama.Config)
 	if err != nil {
 		return
@@ -77,6 +81,11 @@ func (gollama *Gollama) Run() (string, error) {
 		defer wg.Done()
 		gollama.generate()
 	}()
+
+	if gollama.Config.PipedMode || gollama.Config.Raw {
+		wg.Wait()
+		return "", nil
+	}
 
 	resModel, err := gollama.Program.Run()
 	if err != nil {
