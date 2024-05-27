@@ -35,6 +35,7 @@ type Config struct {
 	Images     []string
 	MultiModal bool
 	PipedMode  bool
+	Install    bool
 	Raw        bool
 }
 
@@ -86,6 +87,7 @@ func (c *Config) ParseCLIArgs() {
 	flag.StringVar(&c.BaseURL, "base-url", "http://localhost:11434", "Base URL for the API server")
 	flag.StringVar(&c.ImagePath, "image", STRING_DEFAULT, "Path to the image file to attach (png/jpg/jpeg)")
 	flag.StringVar(&c.ModelName, "model", STRING_DEFAULT, "Model to use for generation")
+	flag.BoolVar(&c.Install, "install", BOOL_DEFAULT, "Install an Ollama Model")
 
 	flag.Parse()
 

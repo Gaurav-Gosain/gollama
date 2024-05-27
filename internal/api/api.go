@@ -21,11 +21,11 @@ func (r ResultMsg) String() string {
 
 type TagModel struct {
 	Details struct {
-		Format            string      `json:"format"`
-		Family            string      `json:"family"`
-		Families          interface{} `json:"families"`
-		ParameterSize     string      `json:"parameter_size"`
-		QuantizationLevel string      `json:"quantization_level"`
+		Format            string `json:"format"`
+		Family            string `json:"family"`
+		Families          any    `json:"families"`
+		ParameterSize     string `json:"parameter_size"`
+		QuantizationLevel string `json:"quantization_level"`
 	} `json:"details"`
 	Name       string `json:"name"`
 	ModifiedAt string `json:"modified_at"`

@@ -6,9 +6,10 @@ import (
 	"sync"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
+
 	"github.com/gaurav-gosain/gollama/internal/config"
 	"github.com/gaurav-gosain/gollama/internal/model"
+	ollamanager "github.com/gaurav-gosain/ollamanager/installer"
 )
 
 type Gollama struct {
@@ -16,34 +17,18 @@ type Gollama struct {
 	Config  *config.Config
 }
 
-func (gollama *Gollama) PrintError(err error, exitOnErr bool) {
-	ErrPadding := lipgloss.NewStyle().Padding(1, 2)
-	ErrorHeader := lipgloss.NewStyle().
-		Foreground(lipgloss.Color("#F1F1F1")).
-		Background(lipgloss.Color("#FF5F87")).
-		Bold(true).
-		Padding(0, 1).
-		SetString("ERROR")
-
-	if err != nil {
-		fmt.Fprintln(
-			os.Stderr,
-			ErrPadding.Render(
-				fmt.Sprintf(
-					"\n%s %s",
-					ErrorHeader.String(),
-					err.Error(),
-				),
-			),
-		)
-		if exitOnErr {
-			os.Exit(1)
-		}
-	}
-}
-
 func (gollama *Gollama) Init() (err error) {
 	gollama.Config = config.NewConfig()
+
+	// This if statement would mean the install flag
+	// was passed, so we branch into the install
+	// process here.
+	if gollama.Config.Install {
+		// Ollamanager(gollama.Config.BaseURL)
+		ollamanager.Ollamanager(gollama.Config.BaseURL)
+		os.Exit(0)
+	}
+
 	err = gollama.Config.RunPromptForm()
 	if err != nil {
 		return

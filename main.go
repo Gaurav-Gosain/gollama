@@ -4,15 +4,16 @@ import (
 	"fmt"
 
 	"github.com/gaurav-gosain/gollama/internal/gollama"
+	"github.com/gaurav-gosain/gollama/internal/utils"
 )
 
 func main() {
 	gollama := &gollama.Gollama{}
 	err := gollama.Init()
-	gollama.PrintError(err, true)
+	utils.PrintError(err, true)
 
 	response, err := gollama.Run()
-	gollama.PrintError(err, true)
+	utils.PrintError(err, true)
 
 	if !gollama.Config.Raw {
 		fmt.Println(response)
