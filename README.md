@@ -59,7 +59,7 @@ You can pull the latest docker image from the
 and run it using the following command:
 
 ```bash
-docker run --net=host -it ghcr.io/gaurav-gosain/gollama:latest
+docker run --net=host -it --rm ghcr.io/gaurav-gosain/gollama:latest
 ```
 
 You can also run Gollama locally using docker:
