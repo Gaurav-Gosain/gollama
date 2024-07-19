@@ -1,7 +1,6 @@
 package client
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -12,7 +11,6 @@ import (
 	"github.com/dustin/go-humanize"
 	"github.com/gaurav-gosain/gollama/internal/api"
 	"github.com/jmoiron/sqlx"
-	"modernc.org/sqlite"
 )
 
 var GollamaInstance Gollama
@@ -47,15 +45,8 @@ func initDatabase() (*sqlx.DB, error) {
 	return sqlx.Open("sqlite3", filepath.Join(CachePath, "chats.db"))
 }
 
+// TODO: handle sqlite errors more gracefully
 func handleSqliteErr(err error) error {
-	sqerr := &sqlite.Error{}
-	if errors.As(err, &sqerr) {
-		return fmt.Errorf(
-			"%w: %s",
-			sqerr,
-			sqlite.ErrorCodeString[sqerr.Code()],
-		)
-	}
 	return err
 }
 
