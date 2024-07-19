@@ -13,7 +13,8 @@ import (
 	"github.com/gaurav-gosain/gollama/internal/chat"
 	"github.com/gaurav-gosain/gollama/internal/chatpicker"
 	"github.com/gaurav-gosain/gollama/internal/client"
-	_ "github.com/mattn/go-sqlite3"
+	_ "github.com/ncruces/go-sqlite3/driver"
+	_ "github.com/ncruces/go-sqlite3/embed"
 )
 
 func main() {
