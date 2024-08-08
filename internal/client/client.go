@@ -32,8 +32,8 @@ type Chat struct {
 }
 
 func (i Chat) Title() string       { return i.ChatTitle }
-func (i Chat) Description() string { return humanize.Time(i.UpdatedAt) }
-func (i Chat) FilterValue() string { return i.ChatTitle }
+func (i Chat) Description() string { return humanize.Time(i.UpdatedAt) + " • " + i.ModelName }
+func (i Chat) FilterValue() string { return i.ChatTitle + i.ModelName }
 
 func initDatabase() (*sqlx.DB, error) {
 	CachePath := filepath.Join(xdg.DataHome, "gollama", "chats")
@@ -134,6 +134,19 @@ func (g *Gollama) CreateChat(chat Chat) error {
 	)
 	if err != nil {
 		return fmt.Errorf("could not create chat: %w", err)
+	}
+	return nil
+}
+
+func (g *Gollama) DeleteChat(id string) error {
+	_, err := g.DB.Exec(
+		`
+        DELETE FROM chats WHERE id = ?
+    `,
+		id,
+	)
+	if err != nil {
+		return fmt.Errorf("could not delete chat: %w", err)
 	}
 	return nil
 }

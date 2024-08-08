@@ -3,6 +3,7 @@ package chatpicker
 import (
 	"fmt"
 
+	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -14,19 +15,12 @@ var docStyle = lipgloss.NewStyle().Margin(1, 2)
 type ExitReason string
 
 const (
-	ExitReasonError   ExitReason = "error"
-	ExitReasonCancel  ExitReason = "cancel"
-	ExitReasonSelect  ExitReason = "select"
-	ExitReasonNewChat ExitReason = "new_chat"
+	ExitReasonError      ExitReason = "error"
+	ExitReasonCancel     ExitReason = "cancel"
+	ExitReasonSelect     ExitReason = "select"
+	ExitReasonNewChat    ExitReason = "new_chat"
+	ExitReasonDeleteChat ExitReason = "delete_chat"
 )
-
-type item struct {
-	title, desc string
-}
-
-func (i item) Title() string       { return i.title }
-func (i item) Description() string { return i.desc }
-func (i item) FilterValue() string { return i.title }
 
 type model struct {
 	list         list.Model
@@ -41,20 +35,43 @@ func (m model) Init() tea.Cmd {
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
-		switch msg.String() {
-		case "ctrl+c", "esc", "q":
-			m.exitReason = ExitReasonCancel
-			return m, tea.Quit
-		case "ctrl+n":
-			m.exitReason = ExitReasonNewChat
-			return m, tea.Quit
-		case "enter":
-			i, ok := m.list.SelectedItem().(client.Chat)
-			if ok {
-				m.selectedChat = i
-				m.exitReason = ExitReasonSelect
+		if m.list.FilterState() != list.Filtering {
+			switch msg.String() {
+			case "esc":
+				if m.list.FilterState() != list.FilterApplied {
+					m.exitReason = ExitReasonCancel
+					return m, tea.Quit
+				}
+			case "ctrl+c", "q":
+				m.exitReason = ExitReasonCancel
+				return m, tea.Quit
+			case "ctrl+n":
+				m.exitReason = ExitReasonNewChat
+				return m, tea.Quit
+			case "enter":
+				i, ok := m.list.SelectedItem().(client.Chat)
+				if ok {
+					m.selectedChat = i
+					m.exitReason = ExitReasonSelect
+				}
+				return m, tea.Quit
+			case "d":
+				i, ok := m.list.SelectedItem().(client.Chat)
+				if ok {
+					m.exitReason = ExitReasonDeleteChat
+					m.selectedChat = i
+					return m, tea.Quit
+				}
 			}
-			return m, tea.Quit
+		} else {
+			switch msg.String() {
+			case "ctrl+c":
+				m.exitReason = ExitReasonCancel
+				return m, tea.Quit
+			case "ctrl+n":
+				m.exitReason = ExitReasonNewChat
+				return m, tea.Quit
+			}
 		}
 	case tea.WindowSizeMsg:
 		h, v := docStyle.GetFrameSize()
@@ -78,6 +95,25 @@ func NewChatPicker(items []list.Item) (client.Chat, ExitReason, error) {
 		0,
 	)}
 	m.list.Title = "Pick a chat"
+
+	additionalKeys := []key.Binding{
+		key.NewBinding(
+			key.WithKeys("ctrl+n"),
+			key.WithHelp("New Chat", "ctrl+n"),
+		),
+		key.NewBinding(
+			key.WithKeys("d"),
+			key.WithHelp("Delete Chat", "d"),
+		),
+	}
+
+	m.list.AdditionalShortHelpKeys = func() []key.Binding {
+		return additionalKeys
+	}
+
+	m.list.AdditionalFullHelpKeys = func() []key.Binding {
+		return additionalKeys
+	}
 
 	p := tea.NewProgram(m, tea.WithAltScreen())
 

@@ -1,18 +1,26 @@
 package chat
 
 import (
+	"bytes"
 	"context"
 	"encoding/gob"
 	"errors"
 	"fmt"
+	"image"
 	"io"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 
+	_ "image/jpeg"
+	_ "image/png"
+
 	"github.com/adrg/xdg"
+	"github.com/atotto/clipboard"
 	"github.com/charmbracelet/bubbles/filepicker"
+	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/glamour"
@@ -20,8 +28,10 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/dustin/go-humanize"
 	"github.com/gaurav-gosain/gollama/internal/client"
-	"github.com/gaurav-gosain/gollama/internal/image"
 	"github.com/gaurav-gosain/gollama/internal/roles"
+	"github.com/gaurav-gosain/gollama/internal/utils"
+	paintbrush "github.com/jordanella/go-ansi-paintbrush"
+	zone "github.com/lrstanley/bubblezone"
 	oapi "github.com/ollama/ollama/api"
 	uuid "github.com/satori/go.uuid"
 	"golang.org/x/term"
@@ -35,6 +45,7 @@ type (
 
 var (
 	purple = lipgloss.Color("#8839ef")
+	notif  = lipgloss.Color("#ff9900")
 	teal   = lipgloss.Color("#00baba")
 	cream  = lipgloss.Color("#FFFDF5")
 	gray   = lipgloss.Color("#aaaaaa")
@@ -43,6 +54,12 @@ var (
 
 var HighlightStyle = lipgloss.NewStyle().
 	Background(purple).
+	Bold(true).
+	Padding(0, 1)
+
+var NotificationStyle = lipgloss.NewStyle().
+	Background(notif).
+	Foreground(black).
 	Bold(true).
 	Padding(0, 1)
 
@@ -62,6 +79,12 @@ var DisabledHighlightStyle = lipgloss.NewStyle().
 
 var RoundedBorder = lipgloss.NewStyle().
 	BorderStyle(lipgloss.RoundedBorder())
+
+var layoutStyle = lipgloss.NewStyle().
+	Border(lipgloss.RoundedBorder()).
+	AlignVertical(lipgloss.Center)
+
+var helpStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("241")).PaddingLeft(1).Render
 
 type ContentType string
 
@@ -88,10 +111,12 @@ func DecodeGob(r io.Reader, messages *[]ChatMessage) error {
 
 type Chat struct {
 	imagepicker          filepicker.Model
+	help                 help.Model
 	promptForm           *huh.Form
 	Glamour              *glamour.TermRenderer
 	modelName            string
 	attachedImage        string
+	notification         string
 	viewport             viewport.Model
 	chatState            []string
 	ChatHistory          []ChatMessage
@@ -102,13 +127,15 @@ type Chat struct {
 	isMultiModal         bool
 	streaming            bool
 	pickingImage         bool
+	helpVisible          bool
+	notificationVisible  bool
 }
 
-type clearErrorMsg struct{}
+type clearNotificationMsg struct{}
 
-func clearErrorAfter(t time.Duration) tea.Cmd {
+func clearNotificationAfter(t time.Duration) tea.Cmd {
 	return tea.Tick(t, func(_ time.Time) tea.Msg {
-		return clearErrorMsg{}
+		return clearNotificationMsg{}
 	})
 }
 
@@ -186,6 +213,11 @@ func NewChat(chatSettings client.Chat) *Chat {
 		}
 	}
 
+	helpModel := help.New()
+	helpModel.ShowAll = true
+	helpModel.Styles.FullDesc.UnsetForeground()
+	helpModel.Styles.FullKey = lipgloss.NewStyle().Foreground(lipgloss.AdaptiveColor{Light: "#43BF6D", Dark: "#73F59F"})
+
 	return &Chat{
 		modelName:            chatSettings.ModelName,
 		imagepicker:          fp,
@@ -194,7 +226,99 @@ func NewChat(chatSettings client.Chat) *Chat {
 		viewport:             vp,
 		ChatSettings:         chatSettings,
 		highlightedChatIndex: highlightedChatIndex,
+		help:                 helpModel,
 	}
+}
+
+type CopyType string
+
+const (
+	CopyLastResponse CopyType = "CopyLastResponse"
+	CopyHighlighted  CopyType = "CopyHighlighted"
+)
+
+func (chat *Chat) CopyToClipboard(content string, copyType CopyType) tea.Cmd {
+	// cross-platform clipboard copy
+	clipboard.WriteAll(content)
+
+	switch copyType {
+	case CopyLastResponse:
+		chat.notification = "Copied last response to clipboard"
+	case CopyHighlighted:
+		chat.notification = "Copied highlighted message to clipboard"
+	}
+
+	chat.notificationVisible = true
+
+	return clearNotificationAfter(time.Second * 3)
+}
+
+func renderImage(path string, height int) string {
+	// Create a new AnsiArt instance
+	canvas := paintbrush.New()
+
+	imgPath, err := utils.ExpandPath(path)
+	if err != nil {
+		return "Failed to expand path"
+	}
+
+	file, err := os.ReadFile(imgPath)
+	if err != nil {
+		return "Failed to load image"
+	}
+
+	img, _, err := image.Decode(bytes.NewReader(file))
+	if err != nil {
+		return "Failed to load image"
+	}
+
+	canvas.SetImage(img)
+
+	// Add more characters and adjust weights as desired
+	weights := map[rune]float64{
+		'': .95,
+		'': .95,
+		'▁': .9,
+		'▂': .9,
+		'▃': .9,
+		'▄': .9,
+		'▅': .9,
+		'▆': .85,
+		'█': .85,
+		'▊': .95,
+		'▋': .95,
+		'▌': .95,
+		'▍': .95,
+		'▎': .95,
+		'▏': .95,
+		'●': .95,
+		'◀': .95,
+		'▲': .95,
+		'▶': .95,
+		'▼': .9,
+		'○': .8,
+		'◉': .95,
+		'◧': .9,
+		'◨': .9,
+		'◩': .9,
+		'◪': .9,
+	}
+
+	canvas.Weights = weights
+
+	// the factor is to compensate for a cell in the terminal not being square (1x1 characters)
+	aspectRatio := float64(img.Bounds().Dx()) * 1.15 / float64(img.Bounds().Dy())
+
+	canvas.SetHeight(max(0, height-3))
+
+	canvas.SetAspectRatio(aspectRatio)
+
+	canvas.SetThreads(runtime.NumCPU())
+
+	// Start the rendering process
+	canvas.Paint()
+
+	return canvas.GetResult()
 }
 
 func (chat *Chat) resetPrompt(
@@ -228,7 +352,8 @@ func (chat *Chat) resetPrompt(
 			textField,
 		),
 	).
-		WithWidth(max(30, chat.width))
+		WithWidth(max(30, chat.width)).
+		WithShowHelp(false)
 
 	cmds = append(cmds, chat.promptForm.Init())
 
@@ -270,11 +395,12 @@ func (chat *Chat) redrawViewport() {
 	state := []string{}
 
 	for i := range chat.ChatHistory {
+		message := chat.chatState[i]
 		if i == chat.highlightedChatIndex {
-			state = append(state, chat.getMessageBubble(chat.ChatHistory[chat.highlightedChatIndex], true))
-		} else {
-			state = append(state, chat.chatState[i])
+			message = chat.getMessageBubble(chat.ChatHistory[chat.highlightedChatIndex], true, fmt.Sprintf("%d", chat.highlightedChatIndex))
 		}
+
+		state = append(state, message)
 
 		if chat.ChatHistory[i].Role == roles.ASSISTANT {
 			state = append(state,
@@ -324,14 +450,17 @@ func makeRounded(content string, color lipgloss.Color) string {
 	return content
 }
 
-func addToBorder(content string, border string, color lipgloss.Color) string {
+func addToBorder(content string, border string, color lipgloss.Color, id string) string {
 	width := lipgloss.Width(content) - 2
 	border = makeRounded(border, color)
 	centered := CenterString(border, width, color)
+	if id != "" {
+		centered = zone.Mark(id, centered)
+	}
 	return lipgloss.JoinVertical(lipgloss.Top, centered, content)
 }
 
-func (chat *Chat) getMessageBubble(msg ChatMessage, isSelected bool) string {
+func (chat *Chat) getMessageBubble(msg ChatMessage, isSelected bool, id string) string {
 	align := lipgloss.Right
 	title := msg.Role
 	body := msg.Message
@@ -360,20 +489,15 @@ func (chat *Chat) getMessageBubble(msg ChatMessage, isSelected bool) string {
 	// TODO: fix this
 	for i := range msg.Images {
 
-		vpImg := image.GetImageMatrix(
-			msg.Images[i],
-			chat.viewport.Width,
-			chat.viewport.Height,
+		body = lipgloss.JoinVertical(
+			lipgloss.Left,
+			renderImage(
+				msg.Images[i],
+				chat.viewport.Height-lipgloss.Height(body),
+			),
+			body,
 		)
 
-		vpImgStr := []string{}
-		for _, row := range vpImg {
-			vpImgStr = append(vpImgStr, lipgloss.JoinHorizontal(lipgloss.Left, row...))
-		}
-
-		vpImgStr = append(vpImgStr, body)
-
-		body = lipgloss.JoinVertical(lipgloss.Left, vpImgStr...)
 		padding = []int{1, 2, 0, 2}
 	}
 
@@ -399,21 +523,42 @@ func (chat *Chat) getMessageBubble(msg ChatMessage, isSelected bool) string {
 
 	width = min(width, max(len(title)+4, lipgloss.Width(body)+2))
 
+	bubble := ""
+
+	if len(msg.Images) > 0 {
+		bubble = addToBorder(
+			RoundedBorder.
+				Border(lipgloss.RoundedBorder(), false, true, true).
+				Align(alignText).
+				Padding(padding...).
+				Foreground(cream).
+				BorderForeground(borderColor).
+				Render(body),
+			titleStyle.Render(title),
+			borderColor,
+			id,
+		)
+	} else {
+		bubble = addToBorder(
+			RoundedBorder.
+				Border(lipgloss.RoundedBorder(), false, true, true).
+				Width(width).
+				Align(alignText).
+				Padding(padding...).
+				Foreground(cream).
+				BorderForeground(borderColor).
+				Render(body),
+			titleStyle.Render(title),
+			borderColor,
+			id,
+		)
+	}
+
 	return lipgloss.NewStyle().
 		Width(chat.width).
 		Align(align).
 		Render(
-			addToBorder(
-				RoundedBorder.
-					Border(lipgloss.RoundedBorder(), false, true, true).
-					Width(width).
-					Align(alignText).
-					Padding(padding...).
-					Foreground(cream).
-					BorderForeground(borderColor).
-					Render(body),
-				titleStyle.Render(title),
-				borderColor),
+			bubble,
 		)
 }
 
@@ -439,7 +584,11 @@ func (chat *Chat) sendMessage(prompt string, role string) tea.Cmd {
 
 	chat.highlightedChatIndex = len(chat.ChatHistory) - 1
 
-	msgBubble := chat.getMessageBubble(currentMessage, false)
+	msgBubble := chat.getMessageBubble(
+		currentMessage,
+		false,
+		fmt.Sprintf("%d", len(chat.ChatHistory)-1),
+	)
 	chat.chatState = append(chat.chatState, msgBubble)
 
 	chat.updateViewport()
@@ -468,7 +617,7 @@ func (chat *Chat) sendMessage(prompt string, role string) tea.Cmd {
 			for _, msg := range chat.ChatHistory {
 				imageData := []oapi.ImageData{}
 				for _, img := range msg.Images {
-					expandedPath, err := image.ExpandPath(img)
+					expandedPath, err := utils.ExpandPath(img)
 					if err != nil {
 						continue
 					}
@@ -502,10 +651,17 @@ func (chat *Chat) sendMessage(prompt string, role string) tea.Cmd {
 	return nil
 }
 
-var helpStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("241")).Render
-
 func helpView() string {
 	helpViewStr := "←/→: Navigate • Enter: Select File • ctrl+o: Return to chat"
+	return helpStyle(helpViewStr)
+}
+
+func (c *Chat) textAreaHelpView() string {
+	helpViewStr := "ctrl+e open editor • enter submit • ctrl+h help"
+	if c.isMultiModal {
+		helpViewStr = "ctrl+e open editor • enter submit • ctrl+o open image picker • ctrl+h help"
+	}
+	// helpViewStr := "alt+enter / ctrl+j new line • ctrl+e open editor • enter submit • ctrl+h help"
 	return helpStyle(helpViewStr)
 }
 
@@ -527,7 +683,15 @@ func (chat *Chat) Resize() tea.Cmd {
 	if chat.width < 80 {
 		width = chat.width - 4
 	}
+	h := lipgloss.Height(chat.promptForm.View())
 
+	chat.help.Width = 8 * chat.width / 10
+
+	chat.viewport.Width = chat.width
+	chat.viewport.Height = chat.height - h - 4
+	if chat.viewport.Height < 0 {
+		chat.viewport.Height = 0
+	}
 	// TODO: check if error
 	chat.Glamour, _ = glamour.NewTermRenderer(
 		glamour.WithStandardStyle("dracula"),
@@ -535,23 +699,16 @@ func (chat *Chat) Resize() tea.Cmd {
 		// glamour.WithPreservedNewLines(),
 	)
 
-	h := lipgloss.Height(chat.promptForm.View())
-
 	// expensive
 	chat.chatState = []string{}
 
-	for _, msg := range chat.ChatHistory {
+	for idx, msg := range chat.ChatHistory {
 		if msg.Role != roles.SYSTEM {
-			msgBubble := chat.getMessageBubble(msg, false)
+			msgBubble := chat.getMessageBubble(msg, false, fmt.Sprintf("%d", idx))
 			chat.chatState = append(chat.chatState, msgBubble)
 		}
 	}
 
-	chat.viewport.Width = chat.width
-	chat.viewport.Height = chat.height - h - 3
-	if chat.viewport.Height < 0 {
-		chat.viewport.Height = 0
-	}
 	chat.updateViewport()
 
 	return nil
@@ -576,15 +733,25 @@ func (chat *Chat) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return chat, nil
 		}
 
+		if chat.helpVisible {
+			switch keypress := msg.String(); keypress {
+			case "ctrl+h":
+				chat.helpVisible = false
+				return chat, nil
+			}
+			return chat, nil
+		}
+
 		if !chat.streaming && !chat.pickingImage {
 			switch msg.String() {
-			case "ctrl+c", "esc":
-				return chat, tea.Quit
 			case "ctrl+o":
 				if chat.isMultiModal {
 					chat.pickingImage = true
 					return chat, nil
 				}
+			case "ctrl+h":
+				chat.helpVisible = true
+				return chat, nil
 			case "ctrl+x":
 				chat.attachedImage = ""
 				return chat, nil
@@ -625,6 +792,14 @@ func (chat *Chat) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				chat.viewport.LineUp(1)
 			case "ctrl+down":
 				chat.viewport.LineDown(1)
+			case "alt+y":
+				cmd := chat.CopyToClipboard(chat.ChatHistory[chat.highlightedChatIndex].Message, CopyHighlighted)
+				cmds = append(cmds, cmd)
+				return chat, tea.Batch(cmds...)
+			case "ctrl+y":
+				cmd := chat.CopyToClipboard(chat.ChatHistory[len(chat.ChatHistory)-1].Message, CopyLastResponse)
+				cmds = append(cmds, cmd)
+				return chat, tea.Batch(cmds...)
 			}
 		}
 	case tea.WindowSizeMsg:
@@ -642,16 +817,37 @@ func (chat *Chat) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		var cmd tea.Cmd
 		chat.viewport, cmd = chat.viewport.Update(msg)
 		cmds = append(cmds, cmd)
+		if msg.Action == tea.MouseActionRelease && msg.Button == tea.MouseButtonLeft {
+			for idx := range chat.ChatHistory {
+				// Check each item to see if it's in bounds.
+				if zone.Get(fmt.Sprintf("%d", idx)).InBounds(msg) {
+					chat.highlightedChatIndex = idx
+					chat.redrawViewport()
+					break
+				}
+			}
+		}
+
+		if msg.Action == tea.MouseActionRelease && msg.Button == tea.MouseButtonRight {
+			cmd := chat.CopyToClipboard(chat.ChatHistory[chat.highlightedChatIndex].Message, CopyHighlighted)
+			cmds = append(cmds, cmd)
+			return chat, tea.Batch(cmds...)
+		}
+
 		return chat, tea.Batch(cmds...)
 	case StreamChunk:
 		// update the last message in the chat history
 		chat.ChatHistory[len(chat.ChatHistory)-1].Message += string(msg)
-		chat.chatState[len(chat.chatState)-1] = chat.getMessageBubble(chat.ChatHistory[len(chat.ChatHistory)-1], false)
+		chat.chatState[len(chat.chatState)-1] = chat.getMessageBubble(chat.ChatHistory[len(chat.ChatHistory)-1], false, fmt.Sprintf("%d", len(chat.ChatHistory)-1))
 		chat.updateViewport()
+		return chat, nil
+	case clearNotificationMsg:
+		chat.notification = ""
+		chat.notificationVisible = false
 		return chat, nil
 	case FinishedStreaming:
 		chat.streaming = false
-		chat.chatState[len(chat.chatState)-1] = chat.getMessageBubble(chat.ChatHistory[len(chat.ChatHistory)-1], false)
+		chat.chatState[len(chat.chatState)-1] = chat.getMessageBubble(chat.ChatHistory[len(chat.ChatHistory)-1], false, fmt.Sprintf("%d", len(chat.ChatHistory)-1))
 		chat.updateViewport()
 		chat.attachedImage = ""
 		return chat, tea.Batch(
@@ -727,10 +923,57 @@ func (chat *Chat) View() string {
 		return chat.ImagePickerView()
 	}
 
-	return lipgloss.JoinVertical(
+	content := lipgloss.JoinVertical(
 		lipgloss.Left,
 		RoundedBorder.Render(chat.viewport.View()),
 		chat.getAttachedImageView(),
 		chat.promptForm.View(),
+		chat.textAreaHelpView(),
 	)
+
+	if chat.helpVisible {
+
+		Keys.SetFullHelpKeys(Keys.DefaultFullHelpKeys())
+		// chat.help.ShowAll = true
+
+		content = utils.PlaceOverlay(
+			chat.width/10,
+			chat.height/10,
+			layoutStyle.
+				Width(8*chat.width/10).
+				Height(8*chat.height/10).
+				AlignHorizontal(lipgloss.Center).
+				BorderForeground(purple).
+				Render(
+					HighlightStyle.Render(" Help Menu ")+
+						"\n\n"+
+						chat.help.View(Keys)+
+						"\n\n"+
+						fmt.Sprintf("Press %s to close this menu", HighlightStyle.Render(" ctrl+h ")),
+				),
+			content,
+		)
+	}
+
+	if chat.notificationVisible {
+		content = utils.PlaceOverlay(
+			chat.width,
+			0,
+			addToBorder(
+				layoutStyle.
+					Border(lipgloss.RoundedBorder(), false, true, true).
+					Padding(1, 2).
+					BorderForeground(notif).
+					Render(
+						chat.notification,
+					),
+				NotificationStyle.Render(" Notification "),
+				notif,
+				"",
+			),
+			content,
+		)
+	}
+
+	return zone.Scan(content)
 }
