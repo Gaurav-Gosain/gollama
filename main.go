@@ -1,7 +1,7 @@
 package main
 
 import (
-	"flag"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -22,6 +22,7 @@ import (
 	zone "github.com/lrstanley/bubblezone"
 	_ "github.com/ncruces/go-sqlite3/driver"
 	_ "github.com/ncruces/go-sqlite3/embed"
+	flag "github.com/spf13/pflag"
 )
 
 func tui() {
@@ -195,12 +196,20 @@ type gollamaConfig struct {
 	Monitor bool
 }
 
+var helpStyle = lipgloss.
+	NewStyle().
+	Padding(0, 1).
+	Background(lipgloss.Color("#8839ef")).
+	Foreground(lipgloss.Color("#FFFFFF"))
+
 func (c *gollamaConfig) ParseCLIArgs() {
 	// Parse command line flags
-	flag.BoolVar(&c.Version, "version", false, "Prints the version of Gollama")
+	flag.BoolVarP(&c.Version, "version", "v", false, "Prints the version of Gollama")
 	flag.BoolVar(&c.Manage, "manage", false, "Manages the installed Ollama models")
 	flag.BoolVar(&c.Install, "install", false, "Installs an Ollama model")
 	flag.BoolVar(&c.Monitor, "monitor", false, "Helps you monitor the status of running Ollama models")
+
+	flag.ErrHelp = errors.New("\n" + helpStyle.Render("Gollama help menu"))
 
 	flag.Parse()
 }
@@ -214,19 +223,13 @@ func main() {
 		if info, ok := debug.ReadBuildInfo(); ok && info.Main.Sum != "" {
 			VERSION = info.Main.Version
 		}
-		fmt.Println("Gollama version:", lipgloss.
-			NewStyle().
-			Padding(0, 1).
-			Background(lipgloss.Color("#8839ef")).
-			Foreground(lipgloss.Color("#FFFFFF")).
+		fmt.Println("Gollama version:", helpStyle.
 			Render(VERSION),
 		)
 		return
 	}
 
 	if cfg.Install {
-		fmt.Println("Installing...")
-
 		selectedTabs := []tabs.Tab{
 			tabs.INSTALL,
 		}
@@ -243,8 +246,6 @@ func main() {
 	}
 
 	if cfg.Manage {
-		fmt.Println("Installing...")
-
 		selectedTabs := []tabs.Tab{
 			tabs.MANAGE,
 		}
@@ -264,8 +265,6 @@ func main() {
 	}
 
 	if cfg.Monitor {
-		fmt.Println("Installing...")
-
 		selectedTabs := []tabs.Tab{
 			tabs.MONITOR,
 		}

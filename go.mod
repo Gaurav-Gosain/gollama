@@ -23,6 +23,7 @@ require (
 	github.com/ncruces/go-sqlite3 v0.17.1
 	github.com/ollama/ollama v0.2.6
 	github.com/satori/go.uuid v1.2.0
+	github.com/spf13/pflag v1.0.5
 	golang.org/x/term v0.20.0
 )
 
