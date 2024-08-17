@@ -95,6 +95,42 @@ type ChatMessage struct {
 	Images    []string
 }
 
+var (
+	LEFT_HALF_CIRCLE  string = string(0xe0b6)
+	RIGHT_HALF_CIRCLE string = string(0xe0b4)
+	BORDER_TOP_LEFT   string = string(0x256d)
+	BORDER_TOP_RIGHT  string = string(0x256e)
+	BORDER_HORIZONTAL string = string(0x2500)
+)
+
+func CenterString(str string, width int, color lipgloss.Color) string {
+	spaces := int(float64(width-lipgloss.Width(str)) / 2)
+	fg := lipgloss.NewStyle().Foreground(color)
+	spacesEnd := width - (spaces + lipgloss.Width(str))
+	if spacesEnd < 0 || spaces < 0 {
+		return ""
+	}
+	return fg.Render(BORDER_TOP_LEFT+strings.Repeat(BORDER_HORIZONTAL, spaces)) +
+		str +
+		fg.Render(strings.Repeat(BORDER_HORIZONTAL, spacesEnd)+BORDER_TOP_RIGHT)
+}
+
+func makeRounded(content string, color lipgloss.Color) string {
+	style := lipgloss.NewStyle().Foreground(color).Render
+	content = style(LEFT_HALF_CIRCLE) + content + style(RIGHT_HALF_CIRCLE)
+	return content
+}
+
+func addToBorder(content string, border string, color lipgloss.Color, id string) string {
+	width := lipgloss.Width(content) - 2
+	border = makeRounded(border, color)
+	centered := CenterString(border, width, color)
+	if id != "" {
+		centered = zone.Mark(id, centered)
+	}
+	return lipgloss.JoinVertical(lipgloss.Top, centered, content)
+}
+
 func EncodeGob(w io.Writer, messages *[]ChatMessage) error {
 	if err := gob.NewEncoder(w).Encode(messages); err != nil {
 		return fmt.Errorf("encode: %w", err)
@@ -309,7 +345,7 @@ func renderImage(path string, height int) string {
 	// the factor is to compensate for a cell in the terminal not being square (1x1 characters)
 	aspectRatio := float64(img.Bounds().Dx()) * 1.15 / float64(img.Bounds().Dy())
 
-	canvas.SetHeight(max(0, height-3))
+	canvas.SetHeight(max(0, height-2))
 
 	canvas.SetAspectRatio(aspectRatio)
 
@@ -430,42 +466,12 @@ func (chat *Chat) updateViewport() {
 	chat.viewport.GotoBottom()
 }
 
-func CenterString(str string, width int, color lipgloss.Color) string {
-	spaces := int(float64(width-lipgloss.Width(str)) / 2)
-	fg := lipgloss.NewStyle().Foreground(color)
-	spacesEnd := width - (spaces + lipgloss.Width(str))
-	if spacesEnd < 0 || spaces < 0 {
-		return ""
-	}
-	return fg.
-		Render("╭"+strings.Repeat("─", spaces)) +
-		str +
-		fg.
-			Render(strings.Repeat("─", spacesEnd)+"╮")
-}
-
-func makeRounded(content string, color lipgloss.Color) string {
-	style := lipgloss.NewStyle().Foreground(color).Render
-	content = style("") + content + style("")
-	return content
-}
-
-func addToBorder(content string, border string, color lipgloss.Color, id string) string {
-	width := lipgloss.Width(content) - 2
-	border = makeRounded(border, color)
-	centered := CenterString(border, width, color)
-	if id != "" {
-		centered = zone.Mark(id, centered)
-	}
-	return lipgloss.JoinVertical(lipgloss.Top, centered, content)
-}
-
 func (chat *Chat) getMessageBubble(msg ChatMessage, isSelected bool, id string) string {
 	align := lipgloss.Right
 	title := msg.Role
 	body := msg.Message
 
-	padding := []int{}
+	padding := []int{0}
 	if msg.Role == roles.ASSISTANT {
 		align = lipgloss.Left
 		title = chat.modelName
@@ -475,14 +481,28 @@ func (chat *Chat) getMessageBubble(msg ChatMessage, isSelected bool, id string) 
 				Padding(1).
 				Render(fmt.Sprintf("Waiting for %s...", chat.modelName))
 		}
+	}
 
-		if !chat.streaming {
-			var err error
-			body, err = chat.Glamour.Render(msg.Message)
-			if err != nil {
-				body = msg.Message
-			}
-			padding = []int{1, 0, 0, 0}
+	if !chat.streaming {
+		var err error
+		width := chat.width / 2
+
+		if chat.width < 80 {
+			width = chat.width - 4
+		}
+		chat.Glamour, _ = glamour.NewTermRenderer(
+			glamour.WithStandardStyle("dracula"),
+			glamour.WithWordWrap(min(width, lipgloss.Width(body)+4)),
+		)
+		body, err = chat.Glamour.Render(msg.Message)
+		if err != nil {
+			body = msg.Message
+		}
+
+		// strip the last line if it's empty
+		lastLine := strings.Split(body, "\n")[len(strings.Split(body, "\n"))-1]
+		if strings.TrimSpace(lastLine) == "" {
+			body = strings.TrimSuffix(body, "\n")
 		}
 	}
 
@@ -495,7 +515,8 @@ func (chat *Chat) getMessageBubble(msg ChatMessage, isSelected bool, id string) 
 				msg.Images[i],
 				chat.viewport.Height-lipgloss.Height(body),
 			),
-			body,
+			"",
+			msg.Message,
 		)
 
 		padding = []int{1, 2, 0, 2}

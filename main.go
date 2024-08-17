@@ -1,9 +1,11 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime/debug"
 
 	"github.com/adrg/xdg"
 	"github.com/charmbracelet/bubbles/list"
@@ -14,6 +16,9 @@ import (
 	"github.com/gaurav-gosain/gollama/internal/chat"
 	"github.com/gaurav-gosain/gollama/internal/chatpicker"
 	"github.com/gaurav-gosain/gollama/internal/client"
+	"github.com/gaurav-gosain/ollamanager/manager"
+	"github.com/gaurav-gosain/ollamanager/tabs"
+	"github.com/gaurav-gosain/ollamanager/utils"
 	zone "github.com/lrstanley/bubblezone"
 	_ "github.com/ncruces/go-sqlite3/driver"
 	_ "github.com/ncruces/go-sqlite3/embed"
@@ -181,6 +186,100 @@ func tui() {
 	}
 }
 
+var VERSION = "unknown (built from source)"
+
+type gollamaConfig struct {
+	Version bool
+	Manage  bool
+	Install bool
+	Monitor bool
+}
+
+func (c *gollamaConfig) ParseCLIArgs() {
+	// Parse command line flags
+	flag.BoolVar(&c.Version, "version", false, "Prints the version of Gollama")
+	flag.BoolVar(&c.Manage, "manage", false, "Manages the installed Ollama models")
+	flag.BoolVar(&c.Install, "install", false, "Installs an Ollama model")
+	flag.BoolVar(&c.Monitor, "monitor", false, "Helps you monitor the status of running Ollama models")
+
+	flag.Parse()
+}
+
 func main() {
+	cfg := &gollamaConfig{}
+
+	cfg.ParseCLIArgs()
+
+	if cfg.Version {
+		if info, ok := debug.ReadBuildInfo(); ok && info.Main.Sum != "" {
+			VERSION = info.Main.Version
+		}
+		fmt.Println("Gollama version:", lipgloss.
+			NewStyle().
+			Padding(0, 1).
+			Background(lipgloss.Color("#8839ef")).
+			Foreground(lipgloss.Color("#FFFFFF")).
+			Render(VERSION),
+		)
+		return
+	}
+
+	if cfg.Install {
+		fmt.Println("Installing...")
+
+		selectedTabs := []tabs.Tab{
+			tabs.INSTALL,
+		}
+		approvedActions := []tabs.ManageAction{}
+
+		result, err := manager.Run(selectedTabs, approvedActions)
+
+		err = utils.PrintActionResult(
+			result,
+			err,
+		)
+
+		return
+	}
+
+	if cfg.Manage {
+		fmt.Println("Installing...")
+
+		selectedTabs := []tabs.Tab{
+			tabs.MANAGE,
+		}
+		approvedActions := []tabs.ManageAction{
+			tabs.UPDATE,
+			tabs.DELETE,
+		}
+
+		result, err := manager.Run(selectedTabs, approvedActions)
+
+		err = utils.PrintActionResult(
+			result,
+			err,
+		)
+
+		return
+	}
+
+	if cfg.Monitor {
+		fmt.Println("Installing...")
+
+		selectedTabs := []tabs.Tab{
+			tabs.MONITOR,
+		}
+		approvedActions := []tabs.ManageAction{}
+
+		result, err := manager.Run(selectedTabs, approvedActions)
+
+		err = utils.PrintActionResult(
+			result,
+			err,
+		)
+
+		return
+	}
+
 	tui()
 }
