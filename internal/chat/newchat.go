@@ -8,6 +8,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/huh"
 	"github.com/gaurav-gosain/gollama/internal/client"
+	"github.com/gaurav-gosain/gollama/internal/utils"
 	"github.com/gaurav-gosain/ollamanager/manager"
 	"github.com/gaurav-gosain/ollamanager/tabs"
 )
@@ -54,7 +55,7 @@ func NewChatSettingsForm() (client.Chat, error) {
 
 	result, err := manager.Run(selectedTabs, approvedActions)
 	if err != nil {
-		panic(err)
+		utils.PrintError(err, true)
 	}
 
 	newChatSettings.ModelName = result.ModelName

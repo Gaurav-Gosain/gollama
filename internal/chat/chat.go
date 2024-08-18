@@ -177,14 +177,13 @@ func clearNotificationAfter(t time.Duration) tea.Cmd {
 
 func GenerateChatID() string {
 	// Creating UUID Version 4
-	// panic on error
 	u1 := uuid.Must(uuid.NewV4(), nil)
 
 	// check db if exists
 	count := 0
 	err := client.GollamaInstance.DB.Get(&count, "SELECT COUNT(*) FROM chats WHERE id = ?", u1.String())
 	if err != nil {
-		panic(err)
+		utils.PrintError(err, true)
 	}
 
 	if count > 0 {
@@ -223,7 +222,7 @@ func NewChat(chatSettings client.Chat) *Chat {
 				chatSettings.ID+".gob",
 			))
 			if err != nil {
-				panic(err)
+				utils.PrintError(err, true)
 			}
 			defer file.Close() //nolint:errcheck
 		} else {
@@ -235,12 +234,12 @@ func NewChat(chatSettings client.Chat) *Chat {
 				chatSettings.ID+".gob",
 			))
 			if err != nil {
-				panic(err)
+				utils.PrintError(err, true)
 			}
 			defer file.Close() //nolint:errcheck
 
 			if err := DecodeGob(file, &chatHistory); err != nil {
-				panic(err)
+				utils.PrintError(err, true)
 			}
 
 			if len(chatHistory) > 0 {
