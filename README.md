@@ -22,9 +22,9 @@
     - [Modal management screens](#modal-management-screens)
   - [Examples](#examples)
     - [TUI Chat Mode](#tui-chat-mode)
-    - [Ollama Model Management (Install/Update/Delete)](#ollama-model-management-installupdatedelete)
+    - [Ollama Model Management](#ollama-model-management)
     - [Piped Mode](#piped-mode)
-    - [CLI Mode with Images (Not supported for all models, check if the model is multimodal)](#cli-mode-with-images-not-supported-for-all-models-check-if-the-model-is-multimodal)
+    - [CLI Mode with Images](#cli-mode-with-images)
   - [Local Development](#local-development)
     - [Run locally using Docker](#run-locally-using-docker)
     - [Build from source](#build-from-source)
@@ -59,6 +59,9 @@ Gollama is here to assist you.
   formatted output.
 - **Multimodal Support**: Gollama now supports multimodal models like Llava
 - **Model Installation & Management**: Easily install and manage models using
+  the [Ollamanager](https://github.com/gaurav-gosain/ollamanager) library.
+  Directly integrated with Gollama, refer the [Ollama Model
+  Management](#ollama-model-management) section for more details.
 
 ## Getting Started
 
@@ -231,7 +234,11 @@ The following keybindings are common to all modal management screens:
 
 ![gollama-tui-demo](demo/gollama-demo.gif)
 
-### Ollama Model Management (Install/Update/Delete)
+### Ollama Model Management
+
+> [!INFO]
+> Gollama uses the [Ollamanager](https://github.com/gaurav-gosain/ollamanager) library to manage models.
+> It provides a convenient way to install, update, and delete models.
 
 https://github.com/user-attachments/assets/9e625715-5a8a-4e71-a355-89eaa298eb9b
 
@@ -245,16 +252,20 @@ echo "Once upon a time" | gollama --model="llama3.1" --prompt="prompt goes here"
 gollama --model="llama3.1" --prompt="prompt goes here" < input.txt
 ```
 
-### CLI Mode with Images (Not supported for all models, check if the model is multimodal)
+### CLI Mode with Images
 
-> [!TIP]
-> Different combinations of flags can be used as per your requirements.
+> [!NOTE]
+> Not supported for all models, check if the model is multimodal
 
 ```bash
 gollama --model="llava:latest" \
  --prompt="prompt goes here" \
  --images="path/to/image.png"
 ```
+
+> [!WARNING]
+> The `--model` and `--prompt` flags are mandatory for CLI mode.
+> The `--images` flag is optional.
 
 ## Local Development
 
@@ -335,6 +346,11 @@ Gollama relies on the following third-party packages:
 - [x] GitHub Actions for automated releases.
 - [x] Add support for downloading models directly from Ollama using the rest API.
 - [ ] Add support for extracting and copying codeblocks from the generated responses.
+- [ ] Add CLI options to interact with the database and perform operations like:
+  - [ ] Deleting chats
+  - [ ] Creating a new chat
+  - [ ] Listing chats
+  - [ ] Continuing a chat from the CLI
 
 ## Contribution
 
