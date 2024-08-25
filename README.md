@@ -3,8 +3,8 @@
 <!--toc:start-->
 
 - [🤖 Gollama: Ollama in your terminal, Your Offline AI Copilot 🦙](#🤖-gollama-ollama-in-your-terminal-your-offline-ai-copilot-🦙)
-  - [🌟 Features](#🌟-features)
-  - [🚀 Getting Started](#🚀-getting-started)
+  - [Features](#features)
+  - [Getting Started](#getting-started)
     - [Prerequisites](#prerequisites)
     - [Installation](#installation)
       - [Download the latest release](#download-the-latest-release)
@@ -14,21 +14,21 @@
     - [Options](#options)
       - [TUI Specific Flags](#tui-specific-flags)
       - [CLI Specific Flags](#cli-specific-flags)
-  - [🔑 Keymaps](#🔑-keymaps)
+  - [Keymaps](#keymaps)
     - [`Pick a chat` screen](#pick-a-chat-screen)
     - [Main Chat Screen](#main-chat-screen)
     - [Modal management screens](#modal-management-screens)
-  - [📖 Examples](#📖-examples)
+  - [Examples](#examples)
     - [TUI Chat Mode](#tui-chat-mode)
     - [Ollama Model Management (Install/Update/Delete)](#ollama-model-management-installupdatedelete)
     - [Piped Mode](#piped-mode)
     - [CLI Mode with Images (Not supported for all models, check if the model is multimodal)](#cli-mode-with-images-not-supported-for-all-models-check-if-the-model-is-multimodal)
-  - [🧑‍💻 Local Development](#🧑‍💻-local-development)
+  - [Local Development](#local-development)
     - [Run locally using Docker](#run-locally-using-docker)
     - [Build from source](#build-from-source)
-  - [📦 Dependencies](#📦-dependencies)
-  - [🗺️ Roadmap](#🗺️-roadmap)
-  - [🤝 Contribution](#🤝-contribution)
+  - [Dependencies](#dependencies)
+  - [Roadmap](#roadmap)
+  - [Contribution](#contribution)
   - [Star History](#star-history)
   - [📜 License](#📜-license)
   <!--toc:end-->
@@ -42,7 +42,7 @@ Gollama is here to assist you.
 
 ![Gollama](assets/gollama.jpg)
 
-## 🌟 Features
+## Features
 
 - **Chat TUI with History**: Gollama now provides a chat-like TUI experience
   with a history of previous conversations. Saves previous
@@ -58,7 +58,7 @@ Gollama is here to assist you.
 - **Multimodal Support**: Gollama now supports multimodal models like Llava
 - **Model Installation & Management**: Easily install and manage models using
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -148,7 +148,7 @@ docker run --net=host -it --rm ghcr.io/gaurav-gosain/gollama:latest
 > The responses for multimodal LLMs are slower than the normal models (also
 > depends on the size of the attached image)
 
-## 🔑 Keymaps
+## Keymaps
 
 ### `Pick a chat` screen
 
@@ -223,11 +223,11 @@ The following keybindings are common to all modal management screens:
 | `u` | Update selected model |
 | `d` | Delete selected model |
 
-## 📖 Examples
+## Examples
 
 ### TUI Chat Mode
 
- <!-- TODO: Add TUI main gif here -->
+![gollama-tui-demo](demo/gollama-demo.gif)
 
 ### Ollama Model Management (Install/Update/Delete)
 
@@ -254,7 +254,7 @@ gollama --model="llava:latest" \
  --images="path/to/image.png"
 ```
 
-## 🧑‍💻 Local Development
+## Local Development
 
 ### Run locally using Docker
 
@@ -310,7 +310,7 @@ If you prefer to build from source, follow these steps:
    go build
    ```
 
-## 📦 Dependencies
+## Dependencies
 
 Gollama relies on the following third-party packages:
 
@@ -326,7 +326,7 @@ Gollama relies on the following third-party packages:
 - [lipgloss](https://github.com/charmbracelet/lipgloss):
   A library for styling text output in the terminal.
 
-## 🗺️ Roadmap
+## Roadmap
 
 - [x] Implement piped mode for automated usage.
 - [x] Add ability to copy responses to clipboard.
@@ -334,7 +334,7 @@ Gollama relies on the following third-party packages:
 - [x] Add support for downloading models directly from Ollama using the rest API.
 - [ ] Add support for extracting and copying codeblocks from the generated responses.
 
-## 🤝 Contribution
+## Contribution
 
 Contributions are welcome! Whether you want to add new features,
 fix bugs, or improve documentation, feel free to open a pull request.
@@ -365,7 +365,7 @@ style="padding:5px;margin:5px;" /> <img alt="GitHub Commit Activity (Week)"
 src="https://img.shields.io/github/commit-activity/w/Gaurav-Gosain/gollama"
 style="padding:5px;margin:5px;" /> </p>
 
-## 📜 License
+## License
 
 This project is licensed under the MIT License -
 see the [LICENSE](LICENSE) file for details.
