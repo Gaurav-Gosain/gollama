@@ -1,4 +1,4 @@
-FROM golang:1.22 as gollama-build
+FROM golang:1.23 as gollama-build
 
 WORKDIR /go/src/app
 COPY . .

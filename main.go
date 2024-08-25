@@ -14,9 +14,10 @@ func main() {
 
 	cfg.ParseCLIArgs()
 
+	// if the version flag is set, print the version and exit
 	if cfg.Version {
 		if info, ok := debug.ReadBuildInfo(); ok && info.Main.Sum != "" {
-			VERSION = info.Main.Version
+			VERSION = info.Main.Version // set the version variable, if available
 		}
 		fmt.Println("Gollama version:", helpStyle.
 			Render(VERSION),
@@ -24,12 +25,14 @@ func main() {
 		return
 	}
 
+	// any ollamanager related flags branch to the ollamanager process and exit
 	if cfg.Install || cfg.Manage || cfg.Monitor {
 		cfg.ollamanager()
 		return
 	}
 
-	// check if the user has provided a model name and prompt
+	// checks if the user has provided a model name and prompt
+	// if either the model name or prompt is empty, print an error and exit
 	if cfg.ModelName != "" || cfg.Prompt != "" {
 		if cfg.ModelName == "" {
 			utils.PrintError(fmt.Errorf("model name is required for generation"), true)
@@ -41,9 +44,11 @@ func main() {
 			return
 		}
 
+		// calls the generate function to print the generated text to stdout
 		cfg.generate()
 		return
 	}
 
+	// the default case is to start the TUI
 	tui()
 }

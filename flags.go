@@ -35,6 +35,8 @@ func Highlight(s string, highlight string) string {
 		Render(highlight))
 }
 
+// ParseCLIArgs parses the command line arguments and sets the corresponding flags
+// Also, grabs the piped input if available
 func (c *gollamaConfig) ParseCLIArgs() {
 	// Parse command line flags
 	flag.BoolVarP(&c.Version, "version", "v", false, Highlight(
@@ -66,6 +68,19 @@ func (c *gollamaConfig) ParseCLIArgs() {
 	c.GetPipedInput()
 }
 
+// GetPipedInput reads the standard input and prepend it to the prompt if it's available
+// This works with piped input from other commands e.g.
+/*
+ ```sh
+ echo "Hello" | gollama
+ ```
+
+ or
+
+ ```sh
+ gollama < input.txt
+ ```
+*/
 func (c *gollamaConfig) GetPipedInput() {
 	fileInfo, err := os.Stdin.Stat()
 	if err != nil {
@@ -82,9 +97,11 @@ func (c *gollamaConfig) GetPipedInput() {
 			os.Exit(1)
 		}
 
+		// if the prompt is empty, set it to the piped data
 		if c.Prompt == "" {
 			c.Prompt = string(pipedData)
 		} else {
+			// otherwise, prepend the piped data to the prompt as context
 			c.Prompt = fmt.Sprintf("Context: %s\n\nQuestion: %s", pipedData, c.Prompt)
 		}
 	}

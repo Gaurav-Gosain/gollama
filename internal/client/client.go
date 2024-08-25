@@ -31,10 +31,13 @@ type Chat struct {
 	IsMultiModal  bool      `db:"is_multi_modal"`
 }
 
+// Implements the bubbletea.ListItem interface
 func (i Chat) Title() string       { return i.ChatTitle }
 func (i Chat) Description() string { return humanize.Time(i.UpdatedAt) + " • " + i.ModelName }
 func (i Chat) FilterValue() string { return i.ChatTitle + i.ModelName }
 
+// creates a new sqlite database in the XDG_DATA_HOME/gollama/chats directory
+// (if it doesn't exist)
 func initDatabase() (*sqlx.DB, error) {
 	CachePath := filepath.Join(xdg.DataHome, "gollama", "chats")
 
@@ -46,6 +49,7 @@ func initDatabase() (*sqlx.DB, error) {
 }
 
 // TODO: handle sqlite errors more gracefully
+// add logging later on for better debugging and error handling
 func handleSqliteErr(err error) error {
 	return err
 }
@@ -82,6 +86,7 @@ func (g *Gollama) Migrate() error {
 	return nil
 }
 
+// Initializes the sqlite database
 func (g *Gollama) InitDB() error {
 	db, err := initDatabase()
 	if err != nil {
@@ -105,6 +110,7 @@ func (g *Gollama) Connect(api api.OllamaAPI, program *tea.Program) {
 	g.Program = program
 }
 
+// queries the sqlite database for all chats, ordered by newest to oldest
 func (g *Gollama) ListChats() ([]Chat, error) {
 	var chats []Chat
 
@@ -119,6 +125,7 @@ func (g *Gollama) ListChats() ([]Chat, error) {
 	return chats, nil
 }
 
+// creates a new chat in the sqlite database with the given Chat struct
 func (g *Gollama) CreateChat(chat Chat) error {
 	_, err := g.DB.Exec(
 		`
@@ -138,6 +145,7 @@ func (g *Gollama) CreateChat(chat Chat) error {
 	return nil
 }
 
+// deletes a chat from the sqlite database with the given ID
 func (g *Gollama) DeleteChat(id string) error {
 	_, err := g.DB.Exec(
 		`

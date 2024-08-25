@@ -13,6 +13,8 @@ import (
 	"github.com/gaurav-gosain/ollamanager/tabs"
 )
 
+// Huh form for creating a new chat, returns the new chat settings
+// TODO: add more Ollama settings and sliders (temperature, max tokens, etc.)
 func NewChatSettingsForm() (client.Chat, error) {
 	var newChatSettings client.Chat
 

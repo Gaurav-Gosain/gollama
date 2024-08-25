@@ -11,6 +11,7 @@ import (
 	oapi "github.com/ollama/ollama/api"
 )
 
+// Generates a response using the provided configuration (model, prompt and images)
 func (cfg *gollamaConfig) generate() {
 	ollamaAPI, err := api.NewOllamaAPI()
 	if err != nil {
@@ -19,6 +20,8 @@ func (cfg *gollamaConfig) generate() {
 
 	msg := strings.TrimSpace(cfg.Prompt)
 
+	// Create a slice of ImageData to send to Ollama,
+	// expand the paths of the images (if needed) and read the image data
 	imageData := []oapi.ImageData{}
 	for _, img := range cfg.Images {
 		expandedPath, err := utils.ExpandPath(img)
@@ -39,6 +42,7 @@ func (cfg *gollamaConfig) generate() {
 
 	ctx := context.Background()
 
+	// Send the request to Ollama, print the response to stdout using the callback function
 	ollamaAPI.Client.Generate(ctx, &chatRequest, func(response oapi.GenerateResponse) error {
 		fmt.Print(response.Response)
 		return nil

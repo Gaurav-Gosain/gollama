@@ -14,6 +14,7 @@ var docStyle = lipgloss.NewStyle().Margin(1, 2)
 
 type ExitReason string
 
+// ExitReason is an enum for the exit reasons of the chat picker
 const (
 	ExitReasonError      ExitReason = "error"
 	ExitReasonCancel     ExitReason = "cancel"
@@ -22,6 +23,7 @@ const (
 	ExitReasonDeleteChat ExitReason = "delete_chat"
 )
 
+// basic bubbletea list model for the chat picker
 type model struct {
 	list         list.Model
 	exitReason   ExitReason
@@ -87,6 +89,7 @@ func (m model) View() string {
 	return docStyle.Render(m.list.View())
 }
 
+// Helper function to create a new chat picker with the provided items
 func NewChatPicker(items []list.Item) (client.Chat, ExitReason, error) {
 	m := model{list: list.New(
 		items,

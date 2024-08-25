@@ -100,6 +100,26 @@ func (k *KeyMap) DefaultFullHelpKeys() [][]key.Binding {
 	}
 }
 
+func (k *KeyMap) DefaultFullHelpKeysNonMultiModal() [][]key.Binding {
+	return [][]key.Binding{
+		{
+			k.Up,
+			k.Down,
+			k.HalfPageUp,
+			k.HalfPageDown,
+			k.CopyLastResponse,
+			k.ToggleHelp,
+		},
+		{
+			k.HighlightPreviousMessage,
+			k.HighlightNextMessage,
+			k.CopyHighlightedMessage,
+			k.RemoveAttachment,
+			k.Quit,
+		},
+	}
+}
+
 // FullHelp returns keybindings for the expanded help view. It's part of the
 // key.Map interface.
 func (k KeyMap) FullHelp() [][]key.Binding {

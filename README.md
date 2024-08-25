@@ -1,5 +1,38 @@
 # 🤖 Gollama: Ollama in your terminal, Your Offline AI Copilot 🦙
 
+<!--toc:start-->
+
+- [🤖 Gollama: Ollama in your terminal, Your Offline AI Copilot 🦙](#🤖-gollama-ollama-in-your-terminal-your-offline-ai-copilot-🦙)
+  - [🌟 Features](#🌟-features)
+  - [🚀 Getting Started](#🚀-getting-started)
+    - [Prerequisites](#prerequisites)
+    - [Installation](#installation)
+      - [Download the latest release](#download-the-latest-release)
+      - [Install using Go](#install-using-go)
+      - [Run using Docker](#run-using-docker)
+    - [Usage](#usage)
+    - [Options](#options)
+      - [TUI Specific Flags](#tui-specific-flags)
+      - [CLI Specific Flags](#cli-specific-flags)
+  - [🔑 Keymaps](#🔑-keymaps)
+    - [`Pick a chat` screen](#pick-a-chat-screen)
+    - [Main Chat Screen](#main-chat-screen)
+    - [Modal management screens](#modal-management-screens)
+  - [📖 Examples](#📖-examples)
+    - [TUI Chat Mode](#tui-chat-mode)
+    - [Ollama Model Management (Install/Update/Delete)](#ollama-model-management-installupdatedelete)
+    - [Piped Mode](#piped-mode)
+    - [CLI Mode with Images (Not supported for all models, check if the model is multimodal)](#cli-mode-with-images-not-supported-for-all-models-check-if-the-model-is-multimodal)
+  - [🧑‍💻 Local Development](#🧑‍💻-local-development)
+    - [Run locally using Docker](#run-locally-using-docker)
+    - [Build from source](#build-from-source)
+  - [📦 Dependencies](#📦-dependencies)
+  - [🗺️ Roadmap](#🗺️-roadmap)
+  - [🤝 Contribution](#🤝-contribution)
+  - [Star History](#star-history)
+  - [📜 License](#📜-license)
+  <!--toc:end-->
+
 Gollama is a delightful tool that brings [Ollama](https://ollama.com/),
 your offline conversational AI companion, directly into your terminal.
 It provides a fun and interactive way to generate responses from various models
@@ -11,6 +44,9 @@ Gollama is here to assist you.
 
 ## 🌟 Features
 
+- **Chat TUI with History**: Gollama now provides a chat-like TUI experience
+  with a history of previous conversations. Saves previous
+  conversations locally using a SQLite database to continue your conversations later.
 - **Interactive Interface**: Enjoy a seamless user experience with
   intuitive interface powered by [Bubble Tea](https://github.com/charmbracelet/bubbletea).
 - **Customizable Prompts**: Tailor your prompts to get precisely the responses
@@ -19,15 +55,18 @@ Gollama is here to assist you.
   that suit your requirements.
 - **Visual Feedback**: Stay engaged with visual cues like spinners and
   formatted output.
+- **Multimodal Support**: Gollama now supports multimodal models like Llava
+- **Model Installation & Management**: Easily install and manage models using
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 
-- [Go](https://go.dev/) installed on your system.
 - [Ollama](https://ollama.com/) installed on your system or a gollama API server
-  accessible from your machine. (Default: `http://localhost:11434`)
-  Read more about customizing the base URL [here](#options).
+  accessible from your machine. (Default: `http://localhost:11434`,
+  optionally can be configured using the `OLLAMA_HOST` environment
+  variable. Refer the official [Ollama Go SDK docs for further
+  information](https://pkg.go.dev/github.com/ollama/ollama/api#ClientFromEnvironment)
 - At least one model installed on your Ollama server. You can install models
   using the `ollama pull <model-name>` command.
   To find a list of all available models,
@@ -46,6 +85,9 @@ the archive to a location of your choice.
 
 #### Install using Go
 
+> [!NOTE]
+> Prerequisite: [Go](https://go.dev/) installed on your system.
+
 You can also install Gollama using the `go install` command:
 
 ```bash
@@ -61,6 +103,158 @@ and run it using the following command:
 ```bash
 docker run --net=host -it --rm ghcr.io/gaurav-gosain/gollama:latest
 ```
+
+### Usage
+
+1. Run the executable:
+
+   ```bash
+   gollama
+   ```
+
+   `or`
+
+   ```bash
+   /path/to/gollama
+   ```
+
+2. Follow the on-screen instructions to interact with Gollama.
+
+> [!NOTE]
+> Running Gollama with the `-h` flag will display the list of available flags.
+
+### Options
+
+#### TUI Specific Flags
+
+```sh
+  -v, --version Prints the version of Gollama
+  -m, --manage  manages the installed Ollama models (update/delete installed models)
+  -i, --install installs an Ollama model (download and install a model)
+  -r, --monitor Monitor the status of running Ollama models
+```
+
+#### CLI Specific Flags
+
+```sh
+--model string   Model to use for generation
+--prompt string  Prompt to use for generation
+--images strings Paths to the image files to attach (png/jpg/jpeg), comma separated
+```
+
+---
+
+> [!WARNING]
+> The responses for multimodal LLMs are slower than the normal models (also
+> depends on the size of the attached image)
+
+## 🔑 Keymaps
+
+### `Pick a chat` screen
+
+|    Key     | Description          |
+| :--------: | -------------------- |
+|   `↑/k`    | Up                   |
+|   `↓/j`    | Down                 |
+| `→/l/pgdn` | Next page            |
+| `←/h/pgup` | Previous page        |
+|  `g/home`  | Go to start          |
+|  `G/end`   | Go to end            |
+|  `enter`   | Select chat          |
+|    `q`     | Quit                 |
+|    `d`     | Delete chat          |
+|  `ctrl+n`  | New chat             |
+|    `?`     | Toggle extended help |
+
+![pick-a-chat-screen](assets/pick-a-chat-screen.png)
+
+### Main Chat Screen
+
+|      Key      | Description              |
+| :-----------: | ------------------------ |
+|  `ctrl+up/k`  | Move view up             |
+| `ctrl+down/j` | Move view down           |
+|   `ctrl+u`    | Half page up             |
+|   `ctrl+d`    | Half page down           |
+|   `ctrl+p`    | Previous message         |
+|   `ctrl+n`    | Next message             |
+|   `ctrl+y`    | Copy last response       |
+|    `alt+y`    | Copy highlighted message |
+|   `ctrl+o`    | Toggle image picker      |
+|   `ctrl+x`    | Remove attachment        |
+|   `ctrl+h`    | Toggle help              |
+|   `ctrl+c`    | Exit chat                |
+
+> [!NOTE]
+> The `ctrl+o` keybinding only works if the selected model is multimodal
+
+![main-chat-screen](assets/main-chat-screen.png)
+
+### Modal management screens
+
+> [!NOTE]
+> The management screens can be chained together.
+> For example, using the flags `-imr` will run Ollamanager
+> with tabs for installing, managing, and monitoring models.
+
+The following keybindings are common to all modal management screens:
+
+|      Key      | Description                |
+| :-----------: | -------------------------- |
+|      `?`      | Toggle help menu           |
+|     `↑/k`     | Move up                    |
+|     `↓/j`     | Move down                  |
+|     `←/h`     | Move left                  |
+|     `→/l`     | Move right                 |
+|    `enter`    | Pick selected item         |
+|      `/`      | Filter/fuzzy find items    |
+|     `esc`     | Clear filter               |
+|  `q/ctrl+c`   | Quit                       |
+|    `n/tab`    | Switch to the next tab     |
+| `p/shift+tab` | Switch to the previous tab |
+
+![modal-management-screen](assets/modal-management-screen.png)
+
+> [!NOTE]
+> The following keybindings are specific to the `Manage Models` screen/tab:
+
+| Key | Description           |
+| --- | --------------------- |
+| `u` | Update selected model |
+| `d` | Delete selected model |
+
+## 📖 Examples
+
+### TUI Chat Mode
+
+ <!-- TODO: Add TUI main gif here -->
+
+### Ollama Model Management (Install/Update/Delete)
+
+### Piped Mode
+
+```bash
+echo "Once upon a time" | gollama --model="llama3.1" --prompt="prompt goes here"
+```
+
+```bash
+gollama --model="llama3.1" --prompt="prompt goes here" < input.txt
+```
+
+### CLI Mode with Images (Not supported for all models, check if the model is multimodal)
+
+> [!TIP]
+> Different combinations of flags can be used as per your requirements.
+
+```bash
+gollama --model="llava:latest" \
+ --prompt="prompt goes here" \
+ --images="path/to/image.png"
+```
+
+## 🧑‍💻 Local Development
+
+### Run locally using Docker
 
 You can also run Gollama locally using docker:
 
@@ -92,7 +286,7 @@ You can also run Gollama locally using docker:
    docker run --net=host -it gollama
    ```
 
-#### Build from source
+### Build from source
 
 If you prefer to build from source, follow these steps:
 
@@ -114,122 +308,29 @@ If you prefer to build from source, follow these steps:
    go build
    ```
 
-### Usage
-
-1. Run the executable:
-
-   ```bash
-   gollama
-   ```
-
-   `or`
-
-   ```bash
-   /path/to/gollama
-   ```
-
-2. Follow the on-screen instructions to interact with Gollama.
-
-### Options
-
-- `--help`: Display the help message.
-- `--base-url`: Specify a custom base URL for the Ollama server.
-- `--prompt`: Specify a custom prompt for generating responses.
-- `--model`: Choose a specific model for response generation.
-  > List of available Ollama models can be found using the `ollama list` command.
-- `--raw`: Enable raw output mode for unformatted responses.
-
----
-
-> [!NOTE]
-> The following options for multimodal models are also available, but are
-> experimental and may not work as expected
-
----
-
-> [!WARNING]
-> The responses for multimodal LLMs are slower than the normal models (also
-> depends on the size of the attached image)
-
----
-
-- `--attach-image`: Allow attaching an image to the prompt.
-  > This option is automatically set to true if an image path is provided.
-- `--image`: Path to the image file to attach (png/jpg/jpeg).
-
-```bash
-> gollama --help
-Usage of gollama:
-  -attach-image
-        Allow attaching an image (automatically set to true if an image path is provided)
-  -base-url string
-        Base URL for the API server (default "http://localhost:11434")
-  -image string
-        Path to the image file to attach (png/jpg/jpeg)
-  -model string
-        Model to use for generation
-  -prompt string
-        Prompt to use for generation
-  -raw
-        Enable raw output
-```
-
-## 📖 Examples
-
-### Interactive Mode
-
-![Interactive Mode](demo/gollama.gif)
-
-### Piped Mode
-
-> [!NOTE]
-> Piping into Gollama automatically turns on `--raw` output mode.
-
-```bash
-echo "Once upon a time" | ./gollama --model="llama2" --prompt="prompt goes here"
-```
-
-```bash
-./gollama --model="llama2" --prompt="prompt goes here" < input.txt
-```
-
-### CLI Mode with Image
-
-> [!TIP]
-> Different combinations of flags can be used as per your requirements.
-
-```bash
-./gollama --model="llava:latest" \
- --prompt="prompt goes here" \
- --image="path/to/image.png" --raw
-```
-
-### TUI Mode with Image
-
-```bash
-./gollama --attach-image
-```
-
 ## 📦 Dependencies
 
 Gollama relies on the following third-party packages:
 
+- [ollama](https://github.com/ollama/ollama): The official Go SDK for ollama.
+- [ollamanager](https://github.com/gaurav-gosain/ollamanager):
+  A Go library for installing, managing and monitoring ollama models.
 - [bubbletea](https://github.com/charmbracelet/bubbletea):
   A library for building terminal applications using the Model-Update-View pattern.
 - [glamour](https://github.com/charmbracelet/glamour):
   A markdown rendering library for the terminal.
 - [huh](https://github.com/charmbracelet/huh):
-  A library for building terminal-based forms and surveys.
+  A library for building terminal-based forms.
 - [lipgloss](https://github.com/charmbracelet/lipgloss):
   A library for styling text output in the terminal.
 
 ## 🗺️ Roadmap
 
 - [x] Implement piped mode for automated usage.
-- [x] Add support for extracting codeblocks from the generated responses.
-- [x] Add ability to copy responses/codeblocks to clipboard.
-- [ ] GitHub Actions for automated releases.
-- [ ] Add support for downloading models directly from Ollama using the rest API.
+- [x] Add ability to copy responses to clipboard.
+- [x] GitHub Actions for automated releases.
+- [x] Add support for downloading models directly from Ollama using the rest API.
+- [ ] Add support for extracting and copying codeblocks from the generated responses.
 
 ## 🤝 Contribution
 

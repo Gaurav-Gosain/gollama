@@ -18,14 +18,16 @@ import (
 	zone "github.com/lrstanley/bubblezone"
 )
 
+// The entry point for the TUI
 func tui() {
-	err := client.GollamaInstance.InitDB()
+	err := client.GollamaInstance.InitDB() // initializes and migrates the sqlite database
 	if err != nil {
 		utils.PrintError(err, true)
 	}
 
 	defer client.GollamaInstance.DB.Close()
 
+	// keeps the TUI running until the user explicitly exits (or an error occurs)
 	for {
 		chats, err := client.GollamaInstance.ListChats()
 		if err != nil {
@@ -41,6 +43,8 @@ func tui() {
 			for _, chat := range chats {
 				items = append(items, list.Item(chat))
 			}
+
+			// spawns a chat picker with the list of chats
 			var chatPicker client.Chat
 			chatPicker, exitReason, err = chatpicker.NewChatPicker(items)
 			if err != nil {
@@ -107,6 +111,7 @@ func tui() {
 				}
 			}
 		} else {
+			// default case is to start a new chat (i.e. when no chats exist)
 			exitReason = chatpicker.ExitReasonNewChat
 			chatSettings, err = chat.NewChatSettingsForm()
 			if err != nil {
@@ -114,7 +119,9 @@ func tui() {
 			}
 		}
 
-		if exitReason == chatpicker.ExitReasonNewChat || exitReason == chatpicker.ExitReasonSelect {
+		// if a new chat is selected or a chat is created, we start the chat
+		if exitReason == chatpicker.ExitReasonNewChat ||
+			exitReason == chatpicker.ExitReasonSelect {
 			gollamaChat := chat.NewChat(chatSettings)
 
 			p := tea.NewProgram(
@@ -128,8 +135,10 @@ func tui() {
 				utils.PrintError(err, true)
 			}
 
+			// creates a new client and connects it an instance of the ollamaAPI
 			client.GollamaInstance.Connect(ollamaAPI, p)
 
+			// bubblezone is used to add mouse interactivity to the TUI
 			zone.NewGlobal()
 
 			var m tea.Model
@@ -140,6 +149,7 @@ func tui() {
 
 			gollamaChat = m.(*chat.Chat)
 
+			// save the chat history to a .gob file if the chat is not anonymous
 			if !gollamaChat.ChatSettings.IsAnonymous {
 				// dump chat history to .gob file
 				file, err := os.Create(filepath.Join(

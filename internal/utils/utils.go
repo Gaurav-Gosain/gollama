@@ -20,6 +20,7 @@ import (
 	"github.com/muesli/termenv"
 )
 
+// Pretty prints an error to stderr and exits the program if exitOnErr is true
 func PrintError(err error, exitOnErr bool) {
 	ErrPadding := lipgloss.NewStyle().Padding(1, 2)
 	ErrorHeader := lipgloss.NewStyle().
