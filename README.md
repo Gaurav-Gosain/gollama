@@ -30,7 +30,7 @@
   - [Roadmap](#roadmap)
   - [Contribution](#contribution)
   - [Star History](#star-history)
-  - [📜 License](#📜-license)
+  - [License](#license)
   <!--toc:end-->
 
 Gollama is a delightful tool that brings [Ollama](https://ollama.com/),
