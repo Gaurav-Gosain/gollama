@@ -231,6 +231,8 @@ The following keybindings are common to all modal management screens:
 
 ### Ollama Model Management (Install/Update/Delete)
 
+https://github.com/user-attachments/assets/9e625715-5a8a-4e71-a355-89eaa298eb9b
+
 ### Piped Mode
 
 ```bash
