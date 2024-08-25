@@ -236,7 +236,7 @@ The following keybindings are common to all modal management screens:
 
 ### Ollama Model Management
 
-> [!INFO]
+> [!NOTE]
 > Gollama uses the [Ollamanager](https://github.com/gaurav-gosain/ollamanager) library to manage models.
 > It provides a convenient way to install, update, and delete models.
 
@@ -254,7 +254,7 @@ gollama --model="llama3.1" --prompt="prompt goes here" < input.txt
 
 ### CLI Mode with Images
 
-> [!NOTE]
+> [!IMPORTANT]
 > Not supported for all models, check if the model is multimodal
 
 ```bash
