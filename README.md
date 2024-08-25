@@ -1,5 +1,7 @@
 # 🤖 Gollama: Ollama in your terminal, Your Offline AI Copilot 🦙
 
+![gollama-tui-demo](demo/gollama-demo.gif)
+
 <!--toc:start-->
 
 - [🤖 Gollama: Ollama in your terminal, Your Offline AI Copilot 🦙](#🤖-gollama-ollama-in-your-terminal-your-offline-ai-copilot-🦙)
