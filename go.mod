@@ -13,7 +13,7 @@ require (
 	github.com/charmbracelet/huh v0.6.0
 	github.com/charmbracelet/lipgloss v1.0.0
 	github.com/dustin/go-humanize v1.0.1
-	github.com/gaurav-gosain/ollamanager v0.1.18
+	github.com/gaurav-gosain/ollamanager v0.1.19
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/jordanella/go-ansi-paintbrush v0.0.0-20240728195301-b7ad996ecf3d
 	github.com/lrstanley/bubblezone v0.0.0-20240914071701-b48c55a5e78e
