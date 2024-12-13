@@ -30,8 +30,10 @@ func (cfg *gollamaConfig) ollamanager() {
 	result, err := manager.Run(selectedTabs, approvedActions)
 
 	// Pretty prints the result and error (if any)
-	err = ollamanagerUtils.PrintActionResult(
-		result,
-		err,
+	ollamanagerUtils.PrintError(
+		ollamanagerUtils.PrintActionResult(
+			result,
+			err,
+		),
 	)
 }
