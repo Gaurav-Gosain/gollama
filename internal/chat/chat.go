@@ -96,11 +96,11 @@ type ChatMessage struct {
 }
 
 var (
-	LEFT_HALF_CIRCLE  string = fmt.Sprint(0xe0b6)
-	RIGHT_HALF_CIRCLE string = fmt.Sprint(0xe0b4)
-	BORDER_TOP_LEFT   string = fmt.Sprint(0x256d)
-	BORDER_TOP_RIGHT  string = fmt.Sprint(0x256e)
-	BORDER_HORIZONTAL string = fmt.Sprint(0x2500)
+	LEFT_HALF_CIRCLE  string = string(0xe0b6)
+	RIGHT_HALF_CIRCLE string = string(0xe0b4)
+	BORDER_TOP_LEFT   string = string(0x256d)
+	BORDER_TOP_RIGHT  string = string(0x256e)
+	BORDER_HORIZONTAL string = string(0x2500)
 )
 
 // Helper function to center a string within a given width (top rounded border)
