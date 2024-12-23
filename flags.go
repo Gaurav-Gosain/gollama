@@ -102,7 +102,7 @@ func (c *gollamaConfig) GetPipedInput() {
 			c.Prompt = string(pipedData)
 		} else {
 			// otherwise, prepend the piped data to the prompt as context
-			c.Prompt = fmt.Sprintf("Context: %s\n\nQuestion: %s", pipedData, c.Prompt)
+			c.Prompt = fmt.Sprintf("<context>\n%s\n</context>\n<question>\n%s\n</question>", pipedData, c.Prompt)
 		}
 	}
 }
